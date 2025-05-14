@@ -1,3 +1,61 @@
+import math
+
+def ncr(n, i):
+    curN = 1
+    curI = 1
+    subN = 1
+    for k in range(2, n+1):
+        curN *= k
+        if k <= i:
+            curI *= k
+        if k <= (n - i):
+            subN *= k
+    return curN // (curI * subN)
+def pow(k, n): # k^n
+    if n == 0:
+        return 1 
+    cur = pow(k, n//2)
+    cur*=cur
+    if n % 2 == 1:
+        cur *= k
+    return cur
+
+
+def bezier_point_calc(t_val, ctrl_points):
+    n = len(ctrl_points) - 1
+    x,y = 0,0
+    for i in range(0, n + 1):
+        comb = ncr(n, i)
+        fexp = pow(1 - t_val, n - i)
+        nexp = pow(t_val, i)
+        x += comb * fexp * nexp * ctrl_points[i][0]
+        y += comb * fexp * nexp * ctrl_points[i][1]
+    return [x, y]
+
+
+def bezier_curve_calc(ctrl_points, length):
+    prev = bezier_point_calc(0, ctrl_points)
+    store = 0
+    for i in range(1, 1001):
+        cur = 0.001 * i
+        cur_pnt = bezier_point_calc(cur, ctrl_points)
+        store += math.hypot(cur_pnt[0] - prev[0], cur_pnt[1] - prev[1])
+        if float(store) >= float(length):
+            return cur_pnt
+        prev = cur_pnt
+    return prev
+
+def slider_endpoint(cur_object):
+    # possibly need to handle length being longer than the defined curve
+    cur_type = cur_object[5]
+    if cur_type == "B":
+        return bezier_curve_calc(cur_object[6], cur_object[8])
+    elif cur_type == "L":
+        return cur_object[6][-1]
+    elif cur_type == "C":
+        # this part is not necesarrily correct
+        return cur_object[6][2]
+    return cur_object[6][0]
 
 def parse_hit_object(line):
     parts = line.split(",")
@@ -16,39 +74,35 @@ def parse_hit_object(line):
         else:
             result.append(c)
     return result
+
+
 def avg_dist(hit_objects):
     if hit_objects is None:
         return 0
-    last_object = hit_objects[0]
+    last_object = None
     total_dist = 0
-    for i in range(1, len(hit_objects)):
+    for i in range(0, len(hit_objects)):
         cur_object = hit_objects[i]
         type_val = cur_object[3]
-        #print(cur_object) 
-        if type_val & 8:
-            # this should do something to track the distance of the next hit object
-
+        if last_object is None:
+            if type_val & 8:
+                continue
+            if type_val & 1:
+                last_object = [cur_object[0], cur_object[1]]
+            else:
+                last_object = slider_endpoint(cur_object)
+        elif type_val & 8:
+            last_object = None
         elif type_val & 1:
             # consider spinner objects
-            dist = ((last_object[0] - cur_object[0]) ** 2 + (last_object[1] - cur_object[1]) ** 2) ** 0.5
-            total_dist += dist
+            total_dist += math.hypot(last_object[0] - cur_object[0], last_object[1] - cur_object[1])
             last_object = [cur_object[0], cur_object[1]]
         elif type_val & 2:
-            print(cur_object)
-            curve_type = cur_object[5]
-            if curve_type == "B":
-                
-
-
-        '''
-        if cur_object[0] == last_object[0]:
-            dist = ((cur_object[1] - last_object[1]) ** 2 + (cur_object[2] - last_object[2]) ** 2) ** 0.5
-            total_dist += dist
-        last_object = cur_object
-
-        '''
-
-    
+            #print(cur_object)
+            slider_end = slider_endpoint(cur_object)
+            total_dist += math.hypot(last_object[0] - slider_end[0], last_object[1] - slider_end[1])
+            last_object = slider_end
+    return total_dist / len(hit_objects)
 
 def parse_osu_file(file_path):
     hit_objects = []
