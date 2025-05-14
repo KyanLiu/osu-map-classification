@@ -132,4 +132,9 @@ def parse_osu_file(file_path):
 
     print(avg_dist(hit_objects))
 
+parse_osu_file("./assets/dataset/yooh_iceangel_saint.osu")
+parse_osu_file("./assets/dataset/frederic_oddloop_oldnoob.osu")
 parse_osu_file("./assets/dataset/vivid_hikari_extra.osu")
+parse_osu_file("./assets/dataset/linkinpark_breakingthehabit_turbokolab.osu")
+parse_osu_file("./assets/dataset/thelivingtombstone_goodbyemoonmen_cyb3rsomniverse.osu")
+parse_osu_file("./assets/dataset/ericsaade_popular_celebrity.osu")
