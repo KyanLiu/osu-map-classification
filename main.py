@@ -1,4 +1,10 @@
 import math
+import os
+import sys
+sys.path.append('assets/dataset')
+from KNN import KNearestNeighbors
+from mapType import mapConversion
+from mapType import mapClasses
 
 def ncr(n, i):
     curN = 1
@@ -106,6 +112,7 @@ def avg_dist(hit_objects):
 
 def parse_osu_file(file_path):
     hit_objects = []
+    total_data = []
     with open(file_path, "r", encoding="utf-8") as file:
         content = file.read()
         currentType = 0
@@ -129,12 +136,44 @@ def parse_osu_file(file_path):
                 if currentType == 7:
                     cur = parse_hit_object(currentLine)
                     hit_objects.append(cur)
+                elif currentLine.startswith("Title:"):
+                    total_data.append(currentLine[6:])
+                elif currentLine.startswith("CircleSize:"):
+                    total_data.append(["circle size", float(currentLine[11:])])
+                elif currentLine.startswith("OverallDifficulty:"):
+                    total_data.append(["overall difficulty", float(currentLine[18:])])
+                elif currentLine.startswith("ApproachRate:"):
+                    total_data.append(["approach rate", float(currentLine[13:])]) 
 
+    total_data.append(["average note distance", avg_dist(hit_objects)])
     print(avg_dist(hit_objects))
+    return total_data
 
-parse_osu_file("./assets/dataset/yooh_iceangel_saint.osu")
-parse_osu_file("./assets/dataset/frederic_oddloop_oldnoob.osu")
-parse_osu_file("./assets/dataset/vivid_hikari_extra.osu")
-parse_osu_file("./assets/dataset/linkinpark_breakingthehabit_turbokolab.osu")
-parse_osu_file("./assets/dataset/thelivingtombstone_goodbyemoonmen_cyb3rsomniverse.osu")
-parse_osu_file("./assets/dataset/ericsaade_popular_celebrity.osu")
+
+#parse_osu_file("./assets/dataset/yooh_iceangel_saint.osu")
+#parse_osu_file("./assets/dataset/frederic_oddloop_oldnoob.osu")
+#parse_osu_file("./assets/dataset/vivid_hikari_extra.osu")
+#parse_osu_file("./assets/dataset/linkinpark_breakingthehabit_turbokolab.osu")
+#parse_osu_file("./assets/dataset/thelivingtombstone_goodbyemoonmen_cyb3rsomniverse.osu")
+#parse_osu_file("./assets/dataset/ericsaade_popular_celebrity.osu")
+
+data = {}
+for fn in os.listdir('assets/dataset'):
+    if fn.endswith(".osu"):
+        map_osu_details = parse_osu_file("./assets/dataset/" + fn)
+        # this returns stats like aim distance etc...
+        # we then must normalize the data somehow? or do it beforehand
+
+        map_Type_Collection = mapClasses[fn]
+        # this returns data type like aim, should be used for all these catagories
+        for i in range(0, len(map_Type_Collection)):
+            if map_Type_Collection[i] != 0:
+                print(fn, mapConversion[i])
+                if mapConversion[i] not in data:
+                    data[mapConversion[i]] = [map_osu_details]
+                else:
+                    data[mapConversion[i]].append(map_osu_details)
+print(data)
+
+
+# if there is multiple, they can be in multiple catagories

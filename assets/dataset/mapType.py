@@ -2,6 +2,7 @@
 # Map conversion Array:
 # [Speed, Aim, Tech, Flow Aim, Stream, Burst, Consistency]
 mapConversion = ["speed", "jump aim", "tech", "flow aim", "stream", "burst", "consistency"]
+# add precision (circle size)
 
 mapClasses = {
     "ericsaade_popular_celebrity.osu": [0, 1, 0, 0, 0, 0, 0],
