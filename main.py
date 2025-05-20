@@ -81,7 +81,6 @@ def parse_hit_object(line):
             result.append(c)
     return result
 
-
 def avg_dist(hit_objects):
     if hit_objects is None:
         return 0
@@ -100,25 +99,74 @@ def avg_dist(hit_objects):
         elif type_val & 8:
             last_object = None
         elif type_val & 1:
-            # consider spinner objects
             total_dist += math.hypot(last_object[0] - cur_object[0], last_object[1] - cur_object[1])
             last_object = [cur_object[0], cur_object[1]]
         elif type_val & 2:
-            #print(cur_object)
             slider_end = slider_endpoint(cur_object)
             total_dist += math.hypot(last_object[0] - slider_end[0], last_object[1] - slider_end[1])
             last_object = slider_end
     return total_dist / len(hit_objects)
+def get_map_endpoint_time(hit_objects):
+    # estimate end time of map
+    mx = 0
+    mn = float('inf')
+    for line in hit_objects:
+        mx = max(line[2], mx)
+        mn = min(line[2], mn)
+    return [mn, mx]
+def get_slider_ratio(hit_objects):
+    if hit_objects is None:
+        return 0
+    ct = 0
+    for cur_object in hit_objects:
+        type_val = cur_object[3]
+        if type_val & 2:
+            ct += 1
+    return ct / len(hit_objects)
+def avg_bpm(timing_points, map_end_time):
+    weighted_sum = 0 
+    total_dur = 0
+    for i in range(len(timing_points)):
+        line = timing_points[i]
+        cur_bpm = 60000 / line[1]
+        dur = 0
+        if i+1 == len(timing_points):
+            dur = map_end_time - line[0]
+        else:
+            dur = timing_points[i+1][0] - line[0]
+        weighted_sum += dur * cur_bpm
+        total_dur += dur
+    return weighted_sum / total_dur
+def avg_slider_velocity(sv_points, map_end_time):
+    if len(sv_points) == 0:
+        return 1.0
+    weighted_sum = 0
+    total_dur = 0
+    for i in range(len(sv_points)):
+        line = sv_points[i]
+        cur_sv = -100 / line[1]
+        dur = 0
+        if i+1 == len(sv_points):
+            dur = map_end_time - line[0]
+        else:
+            dur = sv_points[i+1][0] - line[0]
+        weighted_sum += dur * cur_sv
+        total_dur += dur
+    return weighted_sum / total_dur
 
 def parse_osu_file(file_path):
     hit_objects = []
+    timing_points = []
+    sv_points = []
     total_data = []
     with open(file_path, "r", encoding="utf-8") as file:
         content = file.read()
         currentType = 0
         # up to 7 types
         for currentLine in content.splitlines():
-            if currentLine == "[Editor]":
+            if currentLine.isspace() or currentLine == "":
+                continue
+            elif currentLine == "[Editor]":
                 currentType = 1
             elif currentLine == "[Metadata]":
                 currentType = 2
@@ -136,6 +184,12 @@ def parse_osu_file(file_path):
                 if currentType == 7:
                     cur = parse_hit_object(currentLine)
                     hit_objects.append(cur)
+                elif currentType == 5:
+                    cur = [float(i) for i in currentLine.split(',')]
+                    if int(cur[6]) == 1:
+                        timing_points.append(cur)
+                    else:
+                        sv_points.append(cur)
                 elif currentLine.startswith("Title:"):
                     total_data.append(currentLine[6:])
                 elif currentLine.startswith("CircleSize:"):
@@ -144,9 +198,25 @@ def parse_osu_file(file_path):
                     total_data.append(["overall difficulty", float(currentLine[18:])])
                 elif currentLine.startswith("ApproachRate:"):
                     total_data.append(["approach rate", float(currentLine[13:])]) 
-
+                elif currentLine.startswith("SliderMultiplier:"):
+                    total_data.append(["slider multiplier", float(currentLine[17:])])
+                elif currentLine.startswith("SliderTickRate:"):
+                    total_data.append(["slider tick rate", float(currentLine[15:])])
+                
+    map_end_time = get_map_endpoint_time(hit_objects)
+    map_length = map_end_time[1] - map_end_time[0]
+    map_density = len(hit_objects) / map_length 
+    total_data.append(["slider to hit objects ratio", get_slider_ratio(hit_objects)])
     total_data.append(["average note distance", avg_dist(hit_objects)])
-    print(avg_dist(hit_objects))
+    total_data.append(["average bpm", avg_bpm(timing_points, map_end_time[1])])
+    total_data.append(["average slider velocity", avg_slider_velocity(sv_points, map_end_time[1])])
+    total_data.append(["length of map", map_length])
+    total_data.append(["map density", map_density])
+    #print("map length", map_end_time[1] - map_end_time[0])
+    #print(avg_bpm(timing_points, map_end_time), "average bpm")
+    #print(avg_slider_velocity(sv_points, map_end_time), "slider velocity")
+    #print(avg_dist(hit_objects))
+    #print(get_slider_ratio(hit_objects))
     return total_data
 
 
@@ -173,7 +243,7 @@ for fn in os.listdir('assets/dataset'):
                     data[mapConversion[i]] = [map_osu_details]
                 else:
                     data[mapConversion[i]].append(map_osu_details)
-print(data)
+#print(data)
 
 
 # if there is multiple, they can be in multiple catagories

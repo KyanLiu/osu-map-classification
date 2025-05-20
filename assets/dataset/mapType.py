@@ -5,6 +5,7 @@ mapConversion = ["speed", "jump aim", "tech", "flow aim", "stream", "burst", "co
 # add precision (circle size)
 
 mapClasses = {
+    "camellia_m1lli0npp_megam1ll0n.osu": [0, 0, 1, 0, 0, 1, 0],
     "ericsaade_popular_celebrity.osu": [0, 1, 0, 0, 0, 0, 0],
     "frederic_oddloop_oldnoob.osu": [0, 0, 0, 0, 0, 0, 0],
     "linkinpark_breakingthehabit_turbokolab.osu": [0, 1, 0, 0, 0, 0, 0],
