@@ -81,61 +81,6 @@ def parse_hit_object(line):
             result.append(c)
     return result
 
-def avg_dist(hit_objects, threshold=200):
-    if hit_objects is None:
-        return 0
-    last_object = None
-    total_dist = 0
-    stream_cnt = 0
-    burst_cnt = 0
-    cur_close = 0
-    for i in range(0, len(hit_objects)):
-        cur_object = hit_objects[i]
-        type_val = cur_object[3]
-        if last_object is None:
-            cur_close = 1
-            if type_val & 8:
-                continue
-            if type_val & 1:
-                last_object = [cur_object[0], cur_object[1]]
-            else:
-                last_object = slider_endpoint(cur_object)
-        elif type_val & 8:
-            last_object = None
-            if cur_close > 6:
-                stream_cnt += cur_close
-            elif cur_close > 2:
-                burst_cnt += cur_close
-            cur_close = 0
-        elif type_val & 1: # circle
-            dist = math.hypot(last_object[0] - cur_object[0], last_object[1] - cur_object[1])
-            if dist <= threshold:
-                cur_close += 1
-            else:
-                if cur_close > 6:
-                    stream_cnt += cur_close
-                elif cur_close > 2:
-                    burst_cnt += cur_close
-                cur_close = 1
-            total_dist += dist
-            last_object = [cur_object[0], cur_object[1]]
-
-        elif type_val & 2: # slider
-            slider_end = slider_endpoint(cur_object)
-            dist = math.hypot(last_object[0] - slider_end[0], last_object[1] - slider_end[1])
-            if cur_close > 6:
-                stream_cnt += cur_close
-            elif cur_close > 2:
-                burst_cnt += cur_close
-            cur_close = 1
-            total_dist += dist
-            last_object = slider_end
-    if cur_close > 6:
-        stream_cnt += cur_close
-    elif cur_close > 2:
-        burst_cnt += cur_close
-    print("stream count", stream_cnt, "burst count", burst_cnt)
-    return [total_dist / len(hit_objects), stream_cnt / len(hit_objects), burst_cnt / len(hit_objects)]
 
 
 def get_map_endpoint_time(hit_objects):
@@ -187,6 +132,99 @@ def avg_slider_velocity(sv_points, map_end_time):
     return weighted_sum / total_dur
         
 
+def avg_dist(hit_objects, map_bpm):
+    if hit_objects is None:
+        return 0
+    last_object = None
+    last_time = 0
+    total_dist = 0
+
+
+    beat_duration = 60000 / map_bpm # in ms, each time between each beat
+    
+    spaced_stream_cnt = 0 # maybe normalize by dividing this by stream_cnt
+    cur_spaced_cnt = 0
+    stream_cnt = 0
+    burst_cnt = 0
+    cur_close = 0
+    # maybe a flow aim count?
+    for i in range(0, len(hit_objects)):
+        cur_object = hit_objects[i]
+        type_val = cur_object[3]
+        if last_object is None:
+            cur_close = 1
+            cur_spaced_cnt = 0
+            if type_val & 8:
+                continue
+            if type_val & 1:
+                last_object = [cur_object[0], cur_object[1]]
+            else:
+                last_object = slider_endpoint(cur_object)
+            last_time = cur_object[2]
+        elif type_val & 8:
+            last_object = None
+            if cur_close > 2 and cur_spaced_cnt > 0:
+                spaced_stream_cnt += cur_spaced_cnt
+            if cur_close > 6:
+                stream_cnt += cur_close
+            elif cur_close > 2:
+                burst_cnt += cur_close
+            cur_close = 0
+            cur_spaced_cnt = 0
+        elif type_val & 1: # circle
+            dist = math.hypot(last_object[0] - cur_object[0], last_object[1] - cur_object[1])
+            # find the beat fraction
+            diff_time = (cur_object[2] - last_time) / beat_duration
+            if diff_time <= 0.3:
+                cur_close += 1
+                if dist >= 100: # spaced stream
+                    cur_spaced_cnt += 1
+            else:
+                if cur_close > 2 and cur_spaced_cnt > 0:
+                    spaced_stream_cnt += cur_spaced_cnt
+                if cur_close > 6:
+                    stream_cnt += cur_close
+                elif cur_close > 2:
+                    burst_cnt += cur_close
+                cur_close = 1
+                cur_spaced_cnt = 0
+
+            #if diff_time <= 0.5:
+                # flow aim check
+
+            total_dist += dist
+            last_object = [cur_object[0], cur_object[1]]
+            last_time = cur_object[2]
+
+        elif type_val & 2: # slider
+            slider_end = slider_endpoint(cur_object)
+            dist = math.hypot(last_object[0] - slider_end[0], last_object[1] - slider_end[1])
+            if cur_close > 2 and cur_spaced_cnt > 0:
+                spaced_stream_cnt += cur_spaced_cnt
+            if cur_close > 6:
+                stream_cnt += cur_close
+            elif cur_close > 2:
+                burst_cnt += cur_close
+            cur_close = 1
+            cur_spaced_cnt = 0
+
+            # add flow aim check
+
+            total_dist += dist
+            last_object = slider_end
+            last_time = cur_object[2]
+    if cur_close > 2 and cur_spaced_cnt > 0:
+        spaced_stream_cnt += cur_spaced_cnt
+    if cur_close > 6:
+        stream_cnt += cur_close
+    elif cur_close > 2:
+        burst_cnt += cur_close
+    spaced_stream_density = 0
+    if stream_cnt > 0:
+        spaced_stream_density = spaced_stream_cnt / stream_cnt
+    print("stream count", stream_cnt, "burst count", burst_cnt, "spaced stream density", spaced_stream_density)
+    return [total_dist / len(hit_objects), stream_cnt / len(hit_objects), burst_cnt / len(hit_objects), spaced_stream_density]
+
 def parse_osu_file(file_path):
     hit_objects = []
     timing_points = []
@@ -235,19 +273,20 @@ def parse_osu_file(file_path):
                     total_data.append(["slider multiplier", float(currentLine[17:])])
                 elif currentLine.startswith("SliderTickRate:"):
                     total_data.append(["slider tick rate", float(currentLine[15:])])
-                
     map_end_time = get_map_endpoint_time(hit_objects)
+    map_bpm = avg_bpm(timing_points, map_end_time[1]) 
     map_length = map_end_time[1] - map_end_time[0]
     map_density = len(hit_objects) / map_length 
-    map_distance_details = avg_dist(hit_objects)
+    map_distance_details = avg_dist(hit_objects, map_bpm)
     total_data.append(["slider to hit objects ratio", get_slider_ratio(hit_objects)])
     total_data.append(["average note distance", map_distance_details[0]])
-    total_data.append(["average bpm", avg_bpm(timing_points, map_end_time[1])])
+    total_data.append(["average bpm", map_bpm])
     total_data.append(["average slider velocity", avg_slider_velocity(sv_points, map_end_time[1])])
     total_data.append(["length of map", map_length])
     total_data.append(["map density", map_density])
     total_data.append(["stream count density", map_distance_details[1]])
     total_data.append(["burst count density", map_distance_details[2]])
+    total_data.append(["spaced stream density", map_distance_details[3]])
     #print("map length", map_end_time[1] - map_end_time[0])
     #print(avg_bpm(timing_points, map_end_time), "average bpm")
     #print(avg_slider_velocity(sv_points, map_end_time), "slider velocity")
@@ -262,7 +301,6 @@ def parse_osu_file(file_path):
 #parse_osu_file("./assets/dataset/linkinpark_breakingthehabit_turbokolab.osu")
 #parse_osu_file("./assets/dataset/thelivingtombstone_goodbyemoonmen_cyb3rsomniverse.osu")
 #parse_osu_file("./assets/dataset/ericsaade_popular_celebrity.osu")
-
 data = {}
 for fn in os.listdir('assets/dataset'):
     if fn.endswith(".osu"):
@@ -280,6 +318,5 @@ for fn in os.listdir('assets/dataset'):
                 else:
                     data[mapConversion[i]].append(map_osu_details)
 #print(data)
-
 
 # if there is multiple, they can be in multiple catagories
