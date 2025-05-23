@@ -63,6 +63,9 @@ def slider_endpoint(cur_object):
         return cur_object[6][2]
     return cur_object[6][0]
 
+def circle_size_radius(cs):
+    return 109 - 9 * cs
+
 def parse_hit_object(line):
     parts = line.split(",")
     result = []
@@ -132,7 +135,7 @@ def avg_slider_velocity(sv_points, map_end_time):
     return weighted_sum / total_dur
         
 
-def avg_dist(hit_objects, map_bpm):
+def avg_dist(hit_objects, map_bpm, circleSize):
     if hit_objects is None:
         return 0
     last_object = None
@@ -147,12 +150,16 @@ def avg_dist(hit_objects, map_bpm):
     stream_cnt = 0
     burst_cnt = 0
     cur_close = 0
+    flow_aim_cnt = 0
+
+    cur_flow = 0
     # maybe a flow aim count?
     for i in range(0, len(hit_objects)):
         cur_object = hit_objects[i]
         type_val = cur_object[3]
         if last_object is None:
             cur_close = 1
+            cur_flow = 1
             cur_spaced_cnt = 0
             if type_val & 8:
                 continue
@@ -171,13 +178,21 @@ def avg_dist(hit_objects, map_bpm):
                 burst_cnt += cur_close
             cur_close = 0
             cur_spaced_cnt = 0
+
+            # flow aim check
+            if cur_flow > 2:
+                flow_aim_cnt += cur_flow
+            cur_flow = 1
         elif type_val & 1: # circle
             dist = math.hypot(last_object[0] - cur_object[0], last_object[1] - cur_object[1])
             # find the beat fraction
             diff_time = (cur_object[2] - last_time) / beat_duration
+            #print(diff_time, cur_close)
             if diff_time <= 0.3:
                 cur_close += 1
-                if dist >= 100: # spaced stream
+                dist_calc = circle_size_radius(circleSize) 
+                #print(dist, dist_calc)
+                if dist >= dist_calc: # spaced stream
                     cur_spaced_cnt += 1
             else:
                 if cur_close > 2 and cur_spaced_cnt > 0:
@@ -189,8 +204,13 @@ def avg_dist(hit_objects, map_bpm):
                 cur_close = 1
                 cur_spaced_cnt = 0
 
-            #if diff_time <= 0.5:
-                # flow aim check
+            # flow aim check
+            if diff_time <= 0.5:
+                cur_flow += 1
+            else:
+                if cur_flow > 2:
+                    flow_aim_cnt += cur_flow
+                cur_flow = 1
 
             total_dist += dist
             last_object = [cur_object[0], cur_object[1]]
@@ -208,7 +228,14 @@ def avg_dist(hit_objects, map_bpm):
             cur_close = 1
             cur_spaced_cnt = 0
 
-            # add flow aim check
+            diff_time = (cur_object[2] - last_time) / beat_duration
+            # flow aim check
+            if diff_time <= 0.5:
+                cur_flow += 1
+            else:
+                if cur_flow > 2:
+                    flow_aim_cnt += cur_flow
+                cur_flow = 1
 
             total_dist += dist
             last_object = slider_end
@@ -219,17 +246,21 @@ def avg_dist(hit_objects, map_bpm):
         stream_cnt += cur_close
     elif cur_close > 2:
         burst_cnt += cur_close
+    if cur_flow > 2:
+        flow_aim_cnt += cur_flow
+    flow_aim_density = flow_aim_cnt / len(hit_objects)
     spaced_stream_density = 0
     if stream_cnt > 0:
         spaced_stream_density = spaced_stream_cnt / stream_cnt
-    print("stream count", stream_cnt, "burst count", burst_cnt, "spaced stream density", spaced_stream_density)
-    return [total_dist / len(hit_objects), stream_cnt / len(hit_objects), burst_cnt / len(hit_objects), spaced_stream_density]
+    print("stream count", stream_cnt, "burst count", burst_cnt, "spaced stream density", spaced_stream_density, "flow aim density", flow_aim_density)
+    return [total_dist / len(hit_objects), stream_cnt / len(hit_objects), burst_cnt / len(hit_objects), spaced_stream_density, flow_aim_density]
 
 def parse_osu_file(file_path):
     hit_objects = []
     timing_points = []
     sv_points = []
     total_data = []
+    circle_size = 0
     with open(file_path, "r", encoding="utf-8") as file:
         content = file.read()
         currentType = 0
@@ -264,6 +295,7 @@ def parse_osu_file(file_path):
                 elif currentLine.startswith("Title:"):
                     total_data.append(currentLine[6:])
                 elif currentLine.startswith("CircleSize:"):
+                    circle_size = float(currentLine[11:])
                     total_data.append(["circle size", float(currentLine[11:])])
                 elif currentLine.startswith("OverallDifficulty:"):
                     total_data.append(["overall difficulty", float(currentLine[18:])])
@@ -277,7 +309,7 @@ def parse_osu_file(file_path):
     map_bpm = avg_bpm(timing_points, map_end_time[1]) 
     map_length = map_end_time[1] - map_end_time[0]
     map_density = len(hit_objects) / map_length 
-    map_distance_details = avg_dist(hit_objects, map_bpm)
+    map_distance_details = avg_dist(hit_objects, map_bpm, circle_size)
     total_data.append(["slider to hit objects ratio", get_slider_ratio(hit_objects)])
     total_data.append(["average note distance", map_distance_details[0]])
     total_data.append(["average bpm", map_bpm])
@@ -287,6 +319,7 @@ def parse_osu_file(file_path):
     total_data.append(["stream count density", map_distance_details[1]])
     total_data.append(["burst count density", map_distance_details[2]])
     total_data.append(["spaced stream density", map_distance_details[3]])
+    total_data.append(["flow aim density", map_distance_details[4]])
     #print("map length", map_end_time[1] - map_end_time[0])
     #print(avg_bpm(timing_points, map_end_time), "average bpm")
     #print(avg_slider_velocity(sv_points, map_end_time), "slider velocity")
@@ -301,22 +334,24 @@ def parse_osu_file(file_path):
 #parse_osu_file("./assets/dataset/linkinpark_breakingthehabit_turbokolab.osu")
 #parse_osu_file("./assets/dataset/thelivingtombstone_goodbyemoonmen_cyb3rsomniverse.osu")
 #parse_osu_file("./assets/dataset/ericsaade_popular_celebrity.osu")
+#parse_osu_file("./assets/dataset/xi_freedomdive_arles.osu")
+#parse_osu_file("./assets/dataset/babymetal_roadofresistance_rebellion.osu")
+#parse_osu_file("./assets/dataset/rubikscube.osu")
 data = {}
 for fn in os.listdir('assets/dataset'):
     if fn.endswith(".osu"):
+        print(fn)
         map_osu_details = parse_osu_file("./assets/dataset/" + fn)
         # this returns stats like aim distance etc...
         # we then must normalize the data somehow? or do it beforehand
-
         map_Type_Collection = mapClasses[fn]
         # this returns data type like aim, should be used for all these catagories
         for i in range(0, len(map_Type_Collection)):
             if map_Type_Collection[i] != 0:
-                print(fn, mapConversion[i])
+                #print(fn, mapConversion[i])
                 if mapConversion[i] not in data:
                     data[mapConversion[i]] = [map_osu_details]
                 else:
                     data[mapConversion[i]].append(map_osu_details)
 #print(data)
-
 # if there is multiple, they can be in multiple catagories

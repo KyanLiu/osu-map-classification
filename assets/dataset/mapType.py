@@ -12,4 +12,7 @@ mapClasses = {
     "thelivingtombstone_goodbyemoonmen_cyb3rsomniverse.osu": [0, 1, 0, 0, 0, 0, 0],
     "vivid_hikari_extra.osu": [],
     "yooh_iceangel_saint.osu": [],
+    "xi_freedomdive_arles.osu": [],
+    "babymetal_roadofresistance_rebellion.osu": [],
+    "rubikscube.osu": []
 }
