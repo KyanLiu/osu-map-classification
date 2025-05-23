@@ -14,5 +14,7 @@ mapClasses = {
     "yooh_iceangel_saint.osu": [],
     "xi_freedomdive_arles.osu": [],
     "babymetal_roadofresistance_rebellion.osu": [],
-    "rubikscube.osu": []
+    "rubikscube.osu": [],
+    "streetlightmanifesto_everythingwentnumb_extreme.osu": [],
+    "busdriver_imaginaryplaces_nebusspeeddemon.osu": []
 }

@@ -205,7 +205,7 @@ def avg_dist(hit_objects, map_bpm, circleSize):
                 cur_spaced_cnt = 0
 
             # flow aim check
-            if diff_time <= 0.5:
+            if diff_time <= 0.4:
                 cur_flow += 1
             else:
                 if cur_flow > 2:
@@ -230,7 +230,7 @@ def avg_dist(hit_objects, map_bpm, circleSize):
 
             diff_time = (cur_object[2] - last_time) / beat_duration
             # flow aim check
-            if diff_time <= 0.5:
+            if diff_time <= 0.4:
                 cur_flow += 1
             else:
                 if cur_flow > 2:
