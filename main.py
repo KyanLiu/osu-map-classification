@@ -1,7 +1,8 @@
 import math
 import os
 import sys
-sys.path.append('assets/dataset')
+import numpy as np
+sys.path.append('assets')
 from KNN import KNearestNeighbors
 from mapType import mapConversion
 from mapType import mapClasses
@@ -252,7 +253,7 @@ def avg_dist(hit_objects, map_bpm, circleSize):
     spaced_stream_density = 0
     if stream_cnt > 0:
         spaced_stream_density = spaced_stream_cnt / stream_cnt
-    print("stream count", stream_cnt, "burst count", burst_cnt, "spaced stream density", spaced_stream_density, "flow aim density", flow_aim_density)
+    #print("stream count", stream_cnt, "burst count", burst_cnt, "spaced stream density", spaced_stream_density, "flow aim density", flow_aim_density)
     return [total_dist / len(hit_objects), stream_cnt / len(hit_objects), burst_cnt / len(hit_objects), spaced_stream_density, flow_aim_density]
 
 def parse_osu_file(file_path):
@@ -334,24 +335,32 @@ def parse_osu_file(file_path):
 #parse_osu_file("./assets/dataset/linkinpark_breakingthehabit_turbokolab.osu")
 #parse_osu_file("./assets/dataset/thelivingtombstone_goodbyemoonmen_cyb3rsomniverse.osu")
 #parse_osu_file("./assets/dataset/ericsaade_popular_celebrity.osu")
-#parse_osu_file("./assets/dataset/xi_freedomdive_arles.osu")
+#print(parse_osu_file("./assets/dataset/xi_freedomdive_arles.osu"))
 #parse_osu_file("./assets/dataset/babymetal_roadofresistance_rebellion.osu")
 #parse_osu_file("./assets/dataset/rubikscube.osu")
-data = {}
-for fn in os.listdir('assets/dataset'):
-    if fn.endswith(".osu"):
-        print(fn)
-        map_osu_details = parse_osu_file("./assets/dataset/" + fn)
-        # this returns stats like aim distance etc...
-        # we then must normalize the data somehow? or do it beforehand
-        map_Type_Collection = mapClasses[fn]
-        # this returns data type like aim, should be used for all these catagories
-        for i in range(0, len(map_Type_Collection)):
-            if map_Type_Collection[i] != 0:
-                #print(fn, mapConversion[i])
-                if mapConversion[i] not in data:
-                    data[mapConversion[i]] = [map_osu_details]
-                else:
-                    data[mapConversion[i]].append(map_osu_details)
-#print(data)
-# if there is multiple, they can be in multiple catagories
+
+#def z_score_calc():
+    
+def main():
+    data = {}
+    for fn in os.listdir('assets/dataset'):
+        if fn.endswith(".osu"):
+            map_osu_details = parse_osu_file("./assets/dataset/" + fn)
+            #print(fn)
+            #print(map_osu_details)
+            # this returns stats like aim distance etc...
+            # we then must normalize the data somehow? or do it beforehand
+            map_Type_Collection = mapClasses[fn]
+            # this returns data type like aim, should be used for all these catagories
+            for i in range(0, len(map_Type_Collection)):
+                if map_Type_Collection[i] != 0:
+                    #print(fn, mapConversion[i])
+                    if mapConversion[i] not in data:
+                        data[mapConversion[i]] = [map_osu_details]
+                    else:
+                        data[mapConversion[i]].append(map_osu_details)
+    #print(data)
+
+
+if __name__ == "__main__":
+    main()
