@@ -6,6 +6,7 @@ sys.path.append('assets')
 from KNN import KNearestNeighbors
 from mapType import mapConversion
 from mapType import mapClasses
+from data import download_osu_data
 
 def ncr(n, i):
     curN = 1
@@ -256,56 +257,54 @@ def avg_dist(hit_objects, map_bpm, circleSize):
     #print("stream count", stream_cnt, "burst count", burst_cnt, "spaced stream density", spaced_stream_density, "flow aim density", flow_aim_density)
     return [total_dist / len(hit_objects), stream_cnt / len(hit_objects), burst_cnt / len(hit_objects), spaced_stream_density, flow_aim_density]
 
-def parse_osu_file(file_path):
+def parse_osu_file(beatmap_data):
     hit_objects = []
     timing_points = []
     sv_points = []
     total_data = []
     circle_size = 0
-    with open(file_path, "r", encoding="utf-8") as file:
-        content = file.read()
-        currentType = 0
-        # up to 7 types
-        for currentLine in content.splitlines():
-            if currentLine.isspace() or currentLine == "":
-                continue
-            elif currentLine == "[Editor]":
-                currentType = 1
-            elif currentLine == "[Metadata]":
-                currentType = 2
-            elif currentLine == "[Difficulty]":
-                currentType = 3
-            elif currentLine == "[Events]":
-                currentType = 4
-            elif currentLine == "[TimingPoints]":
-                currentType = 5
-            elif currentLine == "[Colours]":
-                currentType = 6
-            elif currentLine == "[HitObjects]":
-                currentType = 7
-            else:
-                if currentType == 7:
-                    cur = parse_hit_object(currentLine)
-                    hit_objects.append(cur)
-                elif currentType == 5:
-                    cur = [float(i) for i in currentLine.split(',')]
-                    if int(cur[6]) == 1:
-                        timing_points.append(cur)
-                    else:
-                        sv_points.append(cur)
-                elif currentLine.startswith("Title:"):
-                    total_data.append(currentLine[6:])
-                elif currentLine.startswith("CircleSize:"):
-                    circle_size = float(currentLine[11:])
-                    total_data.append(["circle size", float(currentLine[11:])])
-                elif currentLine.startswith("OverallDifficulty:"):
-                    total_data.append(["overall difficulty", float(currentLine[18:])])
-                elif currentLine.startswith("ApproachRate:"):
-                    total_data.append(["approach rate", float(currentLine[13:])]) 
-                elif currentLine.startswith("SliderMultiplier:"):
-                    total_data.append(["slider multiplier", float(currentLine[17:])])
-                elif currentLine.startswith("SliderTickRate:"):
-                    total_data.append(["slider tick rate", float(currentLine[15:])])
+    currentType = 0
+    # up to 7 types
+    for currentLine in beatmap_data.splitlines():
+        if currentLine.isspace() or currentLine == "":
+            continue
+        elif currentLine == "[Editor]":
+            currentType = 1
+        elif currentLine == "[Metadata]":
+            currentType = 2
+        elif currentLine == "[Difficulty]":
+            currentType = 3
+        elif currentLine == "[Events]":
+            currentType = 4
+        elif currentLine == "[TimingPoints]":
+            currentType = 5
+        elif currentLine == "[Colours]":
+            currentType = 6
+        elif currentLine == "[HitObjects]":
+            currentType = 7
+        else:
+            if currentType == 7:
+                cur = parse_hit_object(currentLine)
+                hit_objects.append(cur)
+            elif currentType == 5:
+                cur = [float(i) for i in currentLine.split(',')]
+                if int(cur[6]) == 1:
+                    timing_points.append(cur)
+                else:
+                    sv_points.append(cur)
+            elif currentLine.startswith("Title:"):
+                total_data.append(currentLine[6:])
+            elif currentLine.startswith("CircleSize:"):
+                circle_size = float(currentLine[11:])
+                total_data.append(["circle size", float(currentLine[11:])])
+            elif currentLine.startswith("OverallDifficulty:"):
+                total_data.append(["overall difficulty", float(currentLine[18:])])
+            elif currentLine.startswith("ApproachRate:"):
+                total_data.append(["approach rate", float(currentLine[13:])]) 
+            elif currentLine.startswith("SliderMultiplier:"):
+                total_data.append(["slider multiplier", float(currentLine[17:])])
+            elif currentLine.startswith("SliderTickRate:"):
+                total_data.append(["slider tick rate", float(currentLine[15:])])
     map_end_time = get_map_endpoint_time(hit_objects)
     map_bpm = avg_bpm(timing_points, map_end_time[1]) 
     map_length = map_end_time[1] - map_end_time[0]
@@ -341,7 +340,17 @@ def parse_osu_file(file_path):
 
 #def z_score_calc():
     
+def insertData(beatmap_id):
+    data = download_osu_data(beatmap_id)
+    if data is None:
+        return
+    map_osu_details = parse_osu_file(data)
+    print(map_osu_details)
+
+    
 def main():
+    insertData(2201460) 
+    '''
     data = {}
     for fn in os.listdir('assets/dataset'):
         if fn.endswith(".osu"):
@@ -360,6 +369,7 @@ def main():
                     else:
                         data[mapConversion[i]].append(map_osu_details)
     #print(data)
+    '''
 
 
 if __name__ == "__main__":
