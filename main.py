@@ -328,28 +328,20 @@ def parse_osu_file(beatmap_data):
     return total_data
 
 
-#parse_osu_file("./assets/dataset/yooh_iceangel_saint.osu")
-#parse_osu_file("./assets/dataset/frederic_oddloop_oldnoob.osu")
-#parse_osu_file("./assets/dataset/vivid_hikari_extra.osu")
-#parse_osu_file("./assets/dataset/linkinpark_breakingthehabit_turbokolab.osu")
-#parse_osu_file("./assets/dataset/thelivingtombstone_goodbyemoonmen_cyb3rsomniverse.osu")
-#parse_osu_file("./assets/dataset/ericsaade_popular_celebrity.osu")
-#print(parse_osu_file("./assets/dataset/xi_freedomdive_arles.osu"))
-#parse_osu_file("./assets/dataset/babymetal_roadofresistance_rebellion.osu")
-#parse_osu_file("./assets/dataset/rubikscube.osu")
-
 #def z_score_calc():
     
-def insertData(beatmap_id):
+
+def insertDataById(beatmap_id):
     data = download_osu_data(beatmap_id)
     if data is None:
         return
     map_osu_details = parse_osu_file(data)
     print(map_osu_details)
-
+    
     
 def main():
-    insertData(2201460) 
+    insertDataById(2201460) 
+
     '''
     data = {}
     for fn in os.listdir('assets/dataset'):
