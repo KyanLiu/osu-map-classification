@@ -344,14 +344,25 @@ def insertDataById(beatmap_id):
     insert_db(map_osu_details)
     #print(map_osu_details)
     
+def get_tags(data, tags)
+    # connect the data with tags/classes
+    # remove the beatmap id and name from the data?
     
 def main():
     #insertDataById(2201460) 
     #insertDataById(3970329)
     mean, standard_deviation = standard_deviation_calc()
-    print(standardize_data(mean, standard_deviation))
+    standardized_data = standardize_data(mean, standard_deviation)
+    print(standardize_data)
+
+
+    catagorical_data = {}
+
+    clf = KNearestNeighbors()
+    clf.fit(standardized_data)
+    #clf.predict()
+
     '''
-    data = {}
     for fn in os.listdir('assets/dataset'):
         if fn.endswith(".osu"):
             map_osu_details = parse_osu_file("./assets/dataset/" + fn)

@@ -100,7 +100,10 @@ def standardize_data(standard_deviation, mean):
     numbers = [row[2:] for row in data]  
     standard_deviation[standard_deviation == 0] = 1
     standardized_numbers = (np.array(numbers) - np.array(mean)) / np.array(standard_deviation)
-    return standardized_numbers.tolist()
+    new_data = standardized_numbers.tolist()
+    for i, row in enumerate(data):
+        data[i][2:] = new_data[i]
+    return data
 
 #insert_db(test_data)
 #standardize_data()
