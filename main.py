@@ -7,6 +7,7 @@ from KNN import KNearestNeighbors
 from mapType import mapConversion
 from mapType import mapClasses
 from data import download_osu_data
+from db import insert_db, standardize_data, build_db, exists_db, standard_deviation_calc
 
 def ncr(n, i):
     curN = 1
@@ -257,11 +258,11 @@ def avg_dist(hit_objects, map_bpm, circleSize):
     #print("stream count", stream_cnt, "burst count", burst_cnt, "spaced stream density", spaced_stream_density, "flow aim density", flow_aim_density)
     return [total_dist / len(hit_objects), stream_cnt / len(hit_objects), burst_cnt / len(hit_objects), spaced_stream_density, flow_aim_density]
 
-def parse_osu_file(beatmap_data):
+def parse_osu_file(beatmap_data, beatmap_id):
     hit_objects = []
     timing_points = []
     sv_points = []
-    total_data = []
+    total_data = [beatmap_id]
     circle_size = 0
     currentType = 0
     # up to 7 types
@@ -332,16 +333,23 @@ def parse_osu_file(beatmap_data):
     
 
 def insertDataById(beatmap_id):
+    if exists_db(beatmap_id):
+        print("Beatmap ID", beatmap_id, "is already in the database.")
+        return
+
     data = download_osu_data(beatmap_id)
     if data is None:
         return
-    map_osu_details = parse_osu_file(data)
-    print(map_osu_details)
+    map_osu_details = parse_osu_file(data, beatmap_id)
+    insert_db(map_osu_details)
+    #print(map_osu_details)
     
     
 def main():
-    insertDataById(2201460) 
-
+    #insertDataById(2201460) 
+    #insertDataById(3970329)
+    mean, standard_deviation = standard_deviation_calc()
+    print(standardize_data(mean, standard_deviation))
     '''
     data = {}
     for fn in os.listdir('assets/dataset'):
