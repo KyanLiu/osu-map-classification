@@ -7,7 +7,7 @@ from KNN import KNearestNeighbors
 from mapType import mapConversion
 from mapType import mapClasses
 from data import download_osu_data
-from db import insert_db, standardize_data, build_db, exists_db, standard_deviation_calc
+from db import get_tags_db, insert_db, standardize_data, build_db, exists_db, standard_deviation_calc
 
 def ncr(n, i):
     curN = 1
@@ -341,25 +341,30 @@ def insertDataById(beatmap_id):
     if data is None:
         return
     map_osu_details = parse_osu_file(data, beatmap_id)
-    insert_db(map_osu_details)
+
+    tags = mapClasses[beatmap_id]
+
+    insert_db(map_osu_details, tags)
     #print(map_osu_details)
     
-def get_tags(data, tags)
+def connect_tags(data):
     # connect the data with tags/classes
     # remove the beatmap id and name from the data?
+    tags = get_tags_db()
+
     
 def main():
-    #insertDataById(2201460) 
+    #insertDataById(668662) 
     #insertDataById(3970329)
     mean, standard_deviation = standard_deviation_calc()
     standardized_data = standardize_data(mean, standard_deviation)
-    print(standardize_data)
+    #print(standardized_data)
 
 
-    catagorical_data = {}
+    #catagorical_data = {}
 
-    clf = KNearestNeighbors()
-    clf.fit(standardized_data)
+    #clf = KNearestNeighbors()
+    #clf.fit(standardized_data)
     #clf.predict()
 
     '''

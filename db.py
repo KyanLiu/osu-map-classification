@@ -77,6 +77,12 @@ def build_db():
             FlowAimDensity FLOAT
                 )
                 """)
+    cur.execute("""
+        CREATE TABLE osu_tags_data (
+                map_type TEXT,
+                beatmap_id INTEGER
+            )
+                """)
 
 
 def exists_db(beatmap_id):
@@ -87,10 +93,27 @@ def exists_db(beatmap_id):
     return cur.fetchone() is not None
 
 
-def insert_db(data):
+def insert_db(data, tags):
+    #print(data)
     flat_data = flatten_data(data)
     cur.executemany("INSERT INTO osu_raw_data VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [tuple(flat_data)])
     con.commit()
+    for i in tags:
+        cur.execute("INSERT INTO osu_tags_data VALUES(?, ?)", [i, data[0]])
+        con.commit()
+
+def get_tags_db():
+    # returns a map of all catagories and their beatmap ids
+    cur.execute("SELECT * FROM osu_tags_data")
+    rows = cur.fetchall()
+    data = [list(row) for row in rows]
+    cata = {}
+    for i in data:
+        if i[0] not in cata:
+            cata[i[0]] = [i[1]]
+        else:
+            cata[i[0]].append(i[1])
+    return cata
 
 def standardize_data(standard_deviation, mean):
     #print(standard_deviation, mean)
@@ -109,6 +132,10 @@ def standardize_data(standard_deviation, mean):
 #standardize_data()
 #res = cur.execute("SELECT name FROM sqlite_master")
 #res = cur.execute("SELECT * FROM osu_raw_data")
+#res = cur.execute("SELECT * FROM osu_tags_data")
 #print(res.fetchone())
+#print(res.fetchall())
 #cur.execute("DROP TABLE osu_raw_data")
+#cur.execute("DROP TABLE osu_tags_data")
 #build_db()
+get_tags_db()
