@@ -138,4 +138,4 @@ def standardize_data(standard_deviation, mean):
 #cur.execute("DROP TABLE osu_raw_data")
 #cur.execute("DROP TABLE osu_tags_data")
 #build_db()
-get_tags_db()
+#get_tags_db()

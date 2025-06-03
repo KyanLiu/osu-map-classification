@@ -7,7 +7,7 @@ from KNN import KNearestNeighbors
 from mapType import mapConversion
 from mapType import mapClasses
 from data import download_osu_data
-from db import get_tags_db, insert_db, standardize_data, build_db, exists_db, standard_deviation_calc
+from db import flatten_data, get_tags_db, insert_db, standardize_data, build_db, exists_db, standard_deviation_calc
 
 def ncr(n, i):
     curN = 1
@@ -351,7 +351,29 @@ def connect_tags(data):
     # connect the data with tags/classes
     # remove the beatmap id and name from the data?
     tags = get_tags_db()
+    grouped = {}
+    connect_tags = {}
+    for i in data:
+        grouped[i[0]] = i[2:]
+    for tag in tags:
+        for id in tags[tag]:
+            if id in connect_tags:
+                connect_tags[tag].append(grouped[id])
+            else:
+                connect_tags[tag] = [grouped[id]]
 
+    return connect_tags
+
+def shape_predict_data(beatmap_id, mean, standard_deviation):
+    data = download_osu_data(beatmap_id)
+    if data is None:
+        return
+    map_osu_details = parse_osu_file(data, beatmap_id)
+    numbers = (flatten_data(map_osu_details))[2:]
+    standard_deviation[standard_deviation == 0] = 1
+    standardized_numbers = (np.array(numbers) - np.array(mean)) / np.array(standard_deviation)
+    new_data = standardized_numbers.tolist()
+    return new_data
     
 def main():
     #insertDataById(668662) 
@@ -359,13 +381,12 @@ def main():
     mean, standard_deviation = standard_deviation_calc()
     standardized_data = standardize_data(mean, standard_deviation)
     #print(standardized_data)
-
-
-    #catagorical_data = {}
-
-    #clf = KNearestNeighbors()
-    #clf.fit(standardized_data)
-    #clf.predict()
+    new_train_data = connect_tags(standardized_data)
+    new_test_data = shape_predict_data(1860169, mean, standard_deviation)
+    #print(new_test_data)
+    clf = KNearestNeighbors()
+    clf.fit(new_train_data)
+    print(clf.predict(new_test_data))
 
     '''
     for fn in os.listdir('assets/dataset'):
