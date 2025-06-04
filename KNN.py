@@ -13,15 +13,16 @@ class KNearestNeighbors:
     def fit(self, data):
         # just use the data
         self.data = data
-        
+
     def predict(self, new_point):
         dist = []
         for type in self.data:
             for val in self.data[type]:
-                dist.append([euclidean_distance(val, new_point), type])
+                dist.append([euclidean_distance(val[2:], new_point), [type, val[0], val[1]]])
         sortDist = [i[1] for i in sorted(dist)]
         shortenedDist = sortDist[:self.k]
-        return Counter(shortenedDist).most_common(1)[0][0]
+        #return Counter(shortenedDist).most_common(1)[0][0]
+        return something
     
 
 #clf = KNearestNeighbors()

@@ -354,10 +354,10 @@ def connect_tags(data):
     grouped = {}
     connect_tags = {}
     for i in data:
-        grouped[i[0]] = i[2:]
+        grouped[i[0]] = i
     for tag in tags:
         for id in tags[tag]:
-            if id in connect_tags:
+            if tag in connect_tags:
                 connect_tags[tag].append(grouped[id])
             else:
                 connect_tags[tag] = [grouped[id]]
@@ -382,11 +382,12 @@ def main():
     standardized_data = standardize_data(mean, standard_deviation)
     #print(standardized_data)
     new_train_data = connect_tags(standardized_data)
+    #print(new_train_data)
     new_test_data = shape_predict_data(1860169, mean, standard_deviation)
     #print(new_test_data)
-    clf = KNearestNeighbors()
-    clf.fit(new_train_data)
-    print(clf.predict(new_test_data))
+    #clf = KNearestNeighbors()
+    #clf.fit(new_train_data)
+    #print(clf.predict(new_test_data))
 
     '''
     for fn in os.listdir('assets/dataset'):
