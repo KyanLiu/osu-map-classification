@@ -21,10 +21,7 @@ class KNearestNeighbors:
                 dist.append([euclidean_distance(val[2:], new_point), [type, val[0], val[1]]])
         sortDist = [i[1] for i in sorted(dist)]
         shortenedDist = sortDist[:self.k]
+        print(shortenedDist)
         #return Counter(shortenedDist).most_common(1)[0][0]
-        return something
-    
+        #return something
 
-#clf = KNearestNeighbors()
-#clf.fit(ex)
-#print(clf.predict(new_point))

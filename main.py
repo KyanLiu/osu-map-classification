@@ -4,10 +4,9 @@ import sys
 import numpy as np
 sys.path.append('assets')
 from KNN import KNearestNeighbors
-from mapType import mapConversion
-from mapType import mapClasses
+from mapType import getMapClasses
 from data import download_osu_data
-from db import flatten_data, get_tags_db, insert_db, standardize_data, build_db, exists_db, standard_deviation_calc
+from db import flatten_data, get_tags_db, insert_data_db, insert_tag_db, standardize_data, build_db, exists_db, standard_deviation_calc
 
 def ncr(n, i):
     curN = 1
@@ -332,20 +331,16 @@ def parse_osu_file(beatmap_data, beatmap_id):
 #def z_score_calc():
     
 
-def insertDataById(beatmap_id):
+def insertDataById(beatmap_id, type):
+    insert_tag_db(type, beatmap_id)
     if exists_db(beatmap_id):
         print("Beatmap ID", beatmap_id, "is already in the database.")
         return
-
     data = download_osu_data(beatmap_id)
     if data is None:
         return
     map_osu_details = parse_osu_file(data, beatmap_id)
-
-    tags = mapClasses[beatmap_id]
-
-    insert_db(map_osu_details, tags)
-    #print(map_osu_details)
+    insert_data_db(map_osu_details)
     
 def connect_tags(data):
     # connect the data with tags/classes
@@ -375,39 +370,23 @@ def shape_predict_data(beatmap_id, mean, standard_deviation):
     new_data = standardized_numbers.tolist()
     return new_data
     
+def train_data():
+    mapClasses = getMapClasses()
+    for type in mapClasses:
+        for id in mapClasses[type]:
+            insertDataById(id, type)
+
 def main():
-    #insertDataById(668662) 
-    #insertDataById(3970329)
+    #train_data()
     mean, standard_deviation = standard_deviation_calc()
     standardized_data = standardize_data(mean, standard_deviation)
-    #print(standardized_data)
     new_train_data = connect_tags(standardized_data)
-    #print(new_train_data)
     new_test_data = shape_predict_data(1860169, mean, standard_deviation)
     #print(new_test_data)
-    #clf = KNearestNeighbors()
-    #clf.fit(new_train_data)
-    #print(clf.predict(new_test_data))
+    clf = KNearestNeighbors()
+    clf.fit(new_train_data)
+    print(clf.predict(new_test_data))
 
-    '''
-    for fn in os.listdir('assets/dataset'):
-        if fn.endswith(".osu"):
-            map_osu_details = parse_osu_file("./assets/dataset/" + fn)
-            #print(fn)
-            #print(map_osu_details)
-            # this returns stats like aim distance etc...
-            # we then must normalize the data somehow? or do it beforehand
-            map_Type_Collection = mapClasses[fn]
-            # this returns data type like aim, should be used for all these catagories
-            for i in range(0, len(map_Type_Collection)):
-                if map_Type_Collection[i] != 0:
-                    #print(fn, mapConversion[i])
-                    if mapConversion[i] not in data:
-                        data[mapConversion[i]] = [map_osu_details]
-                    else:
-                        data[mapConversion[i]].append(map_osu_details)
-    #print(data)
-    '''
 
 
 if __name__ == "__main__":

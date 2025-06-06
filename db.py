@@ -93,14 +93,22 @@ def exists_db(beatmap_id):
     return cur.fetchone() is not None
 
 
-def insert_db(data, tags):
+def insert_data_db(data):
     #print(data)
     flat_data = flatten_data(data)
     cur.executemany("INSERT INTO osu_raw_data VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [tuple(flat_data)])
     con.commit()
-    for i in tags:
-        cur.execute("INSERT INTO osu_tags_data VALUES(?, ?)", [i, data[0]])
-        con.commit()
+
+def insert_tag_db(tag, beatmap_id):
+    cur.execute("""
+        SELECT * FROM osu_tags_data
+        WHERE map_type = ? AND beatmap_id = ?
+    """, [tag, beatmap_id])
+    result = cur.fetchone()
+    if result:
+        return
+    cur.execute("INSERT INTO osu_tags_data VALUES(?, ?)", [tag, beatmap_id])
+    con.commit()
 
 def get_tags_db():
     # returns a map of all catagories and their beatmap ids
