@@ -8,7 +8,7 @@ cur = con.cursor()
 
 def flatten_data(data):
     return list(map(lambda i: i[1] if isinstance(i, list) else i, data))
-
+'''
 def standard_deviation_calc():
     cur.execute("""
         SELECT
@@ -54,6 +54,7 @@ def standard_deviation_calc():
     #print("Here are the squared_averages:", squared_averages)
     standard_deviation = np.sqrt(np.array(squared_averages) - (np.array(averages))**2)
     return [list(averages), standard_deviation]
+'''
 
 def build_db():
     cur.execute("""
@@ -117,12 +118,12 @@ def get_tags_db():
     data = [list(row) for row in rows]
     cata = {}
     for i in data:
-        if i[0] not in cata:
-            cata[i[0]] = [i[1]]
+        if i[1] not in cata:
+            cata[i[1]] = [i[0]]
         else:
-            cata[i[0]].append(i[1])
+            cata[i[1]].append(i[0])
     return cata
-
+'''
 def standardize_data(standard_deviation, mean):
     #print(standard_deviation, mean)
     cur.execute("SELECT * FROM osu_raw_data")
@@ -135,6 +136,22 @@ def standardize_data(standard_deviation, mean):
     for i, row in enumerate(data):
         data[i][2:] = new_data[i]
     return data
+'''
+
+def get_data_db():
+    print("test")
+    res = cur.execute("SELECT * FROM osu_raw_data")
+    rows = cur.fetchall()
+    names = [list(row)[:2] for row in rows]  
+    data = [list(row)[2:] for row in rows]  
+    unordered_tags = get_tags_db()
+    tags = []
+    for i in names:
+        tags.append(unordered_tags[i[0]])
+    return [names, data, tags]
+
+
+
 
 #insert_db(test_data)
 #standardize_data()

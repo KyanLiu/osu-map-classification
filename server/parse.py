@@ -6,7 +6,7 @@ sys.path.append('assets')
 from KNN import KNearestNeighbors
 from mapType import getMapClasses
 from data import download_osu_data
-from db import flatten_data, get_tags_db, insert_data_db, insert_tag_db, standardize_data, build_db, exists_db, standard_deviation_calc
+from db import flatten_data, get_tags_db, insert_data_db, insert_tag_db, exists_db
 
 def ncr(n, i):
     curN = 1
@@ -327,21 +327,10 @@ def parse_osu_file(beatmap_data, beatmap_id):
     #print(get_slider_ratio(hit_objects))
     return total_data
 
-
-#def z_score_calc():
+# parse osu file returns the entire dataset and their features
+# we call insertDataById to add map details to the database 
     
-
-def insertDataById(beatmap_id, type):
-    insert_tag_db(type, beatmap_id)
-    if exists_db(beatmap_id):
-        print("Beatmap ID", beatmap_id, "is already in the database.")
-        return
-    data = download_osu_data(beatmap_id)
-    if data is None:
-        return
-    map_osu_details = parse_osu_file(data, beatmap_id)
-    insert_data_db(map_osu_details)
-    
+'''    
 def connect_tags(data):
     # connect the data with tags/classes
     # remove the beatmap id and name from the data?
@@ -375,17 +364,7 @@ def train_data():
     for type in mapClasses:
         for id in mapClasses[type]:
             insertDataById(id, type)
-
-def main():
-    #train_data()
-    mean, standard_deviation = standard_deviation_calc()
-    standardized_data = standardize_data(mean, standard_deviation)
-    new_train_data = connect_tags(standardized_data)
-    new_test_data = shape_predict_data(1860169, mean, standard_deviation)
-    #print(new_test_data)
-    clf = KNearestNeighbors()
-    clf.fit(new_train_data)
-    print(clf.predict(new_test_data))
+'''
 
 
 
