@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import api from '../../api.ts';
 import { mapTag } from '../../constants/mapTags.ts';
 import MapClassButton from '../../components/MapClassButton/MapClassButton.tsx';
@@ -11,9 +11,9 @@ const TrainData = () => {
 
   const submitTrainData = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    //console.log(beatmapId)    
     try {
-      const res = await api.post('/train', {beatmapId});
+      //const res = await api.post('/train', {beatmapId});
+      alert("The beatmap ", beatmapId, " has been added processing stage.")
     }
     catch(error) {
       console.log("There was an error processing the beatmap with Id:", beatmapId);
@@ -21,9 +21,11 @@ const TrainData = () => {
 
   }
 
+// actually this should be sent to the admin dashboard before actually training
+
   const handleTagSelection = (tag: string) => {
-    if (tag in tags) {
-      setTags(tags.filter(t => t !== tag));
+    if (tags.includes(tag)) {
+      setTags(tags.filter(t => t != tag));
     } else {
       setTags([...tags, tag]);
     }
