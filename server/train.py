@@ -1,5 +1,7 @@
+import sklearn
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
 from db import get_data_db, insert_tag_db, exists_db, insert_data_db
 from parse import parse_osu_file
 from data import download_osu_data
@@ -17,21 +19,22 @@ def insertDataById(beatmap_id, typ):
     insert_data_db(map_osu_details)
 
 def train():
+    # split train test
     names, X, y = get_data_db()
-    print(names)
-    print(X)
-    print(y)
-    #scaler = StandardScaler()
-    #scaler.fit(X_train)
+    X_train, X_test, y_train, y_test, names_train, names_test = train_test_split(X, y, names, test_size = 0.2)
+    print("Train:")
+    print(X_train, y_train, names_train)
+    print("Test:")
+    print(X_test, y_test, names_test)
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+    print(X_train_scaled)
+    print(X_test_scaled)
 
-
-    #mean, standard_deviation = standard_deviation_calc()
-    #standardized_data = standardize_data(mean, standard_deviation)
+    clf = KNeighborsClassifier(n_neighbors=1)
+    clf.fit(X_train_scaled, y_train)
+    print(clf.predict(X_test))
     # this returns the data needed
     #new_train_data = connect_tags(standardized_data)
-    #new_test_data = shape_predict_data(1860169, mean, standard_deviation)
-    #print(new_test_data)
-    #clf = KNearestNeighbors()
-    #clf.fit(new_train_data)
-    #print(clf.predict(new_test_data))
 train()
