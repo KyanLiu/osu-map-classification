@@ -5,6 +5,7 @@ import api from '../../api.ts';
 const TrainData = () => {
   const [beatmapId, setBeatmapId] = useState<number>(null)
 
+
   const submitTrainData = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     //console.log(beatmapId)    
@@ -24,6 +25,9 @@ const TrainData = () => {
         <label>Enter the map beatmap id:
           <input type="number" required onChange={(event) => setBeatmapId(event.target.value)} />
         </label>
+        <div>
+          {}
+        </div>
         <button type="submit">Train</button>
       </form>
     </div>
