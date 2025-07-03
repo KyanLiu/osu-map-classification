@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import api from '../../api.ts';
+import api from '../../api/api.ts';
 import { mapTag } from '../../constants/mapTags.ts';
 import MapClassButton from '../../components/MapClassButton/MapClassButton.tsx';
 
