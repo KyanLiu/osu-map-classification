@@ -56,7 +56,7 @@ def standard_deviation_calc():
     return [list(averages), standard_deviation]
 '''
 
-def build_db():
+def build_osu_db():
     cur.execute("""
         CREATE TABLE osu_raw_data (
             BeatmapID INTEGER PRIMARY KEY,
@@ -86,7 +86,7 @@ def build_db():
                 """)
 
 
-def exists_db(beatmap_id):
+def exists_osu_db(beatmap_id):
     cur.execute("""SELECT * FROM osu_raw_data
         WHERE BeatmapID = ? LIMIT 1
     """, 
@@ -94,13 +94,13 @@ def exists_db(beatmap_id):
     return cur.fetchone() is not None
 
 
-def insert_data_db(data):
+def insert_data_osu_db(data):
     #print(data)
     flat_data = flatten_data(data)
     cur.executemany("INSERT INTO osu_raw_data VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [tuple(flat_data)])
     con.commit()
 
-def insert_tag_db(tag, beatmap_id):
+def insert_tag_osu_db(tag, beatmap_id):
     cur.execute("""
         SELECT * FROM osu_tags_data
         WHERE map_type = ? AND beatmap_id = ?
@@ -111,7 +111,7 @@ def insert_tag_db(tag, beatmap_id):
     cur.execute("INSERT INTO osu_tags_data VALUES(?, ?)", [tag, beatmap_id])
     con.commit()
 
-def get_tags_db():
+def get_tags_osu_db():
     # returns a map of all catagories and their beatmap ids
     cur.execute("SELECT * FROM osu_tags_data")
     rows = cur.fetchall()
@@ -138,7 +138,7 @@ def standardize_data(standard_deviation, mean):
     return data
 '''
 
-def get_data_db():
+def get_data_osu_db():
     print("test")
     res = cur.execute("SELECT * FROM osu_raw_data")
     rows = cur.fetchall()

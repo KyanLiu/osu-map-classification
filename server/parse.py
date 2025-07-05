@@ -6,7 +6,6 @@ sys.path.append('assets')
 from KNN import KNearestNeighbors
 from mapType import getMapClasses
 from data import download_osu_data
-from db import flatten_data, get_tags_db, insert_data_db, insert_tag_db, exists_db
 
 def ncr(n, i):
     curN = 1
