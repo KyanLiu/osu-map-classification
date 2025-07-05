@@ -12,7 +12,7 @@ const TrainData = () => {
   const submitTrainData = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      //const res = await api.post('/train', {beatmapId});
+      const res = await api.post('/api/submissions', {beatmapId: beatmapId, tags: tags});
       alert("The beatmap ", beatmapId, " has been added processing stage.")
     }
     catch(error) {

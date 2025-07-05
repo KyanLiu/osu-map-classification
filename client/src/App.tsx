@@ -5,6 +5,7 @@ import Home from './pages/Home/Home.tsx';
 import Search from './pages/Search/Search.tsx';
 import TrainData from './pages/TrainData/TrainData.tsx';
 import Admin from './pages/Admin/Admin.tsx';
+import Login from './pages/Login/Login.tsx';
 import ProtectedRoutes from './utils/ProtectedRoutes.tsx';
 
 function App() {
@@ -16,10 +17,10 @@ function App() {
           <Route path="/" element={<Home/>}></Route>
           <Route path="/search" element={<Search/>}></Route>
           <Route path="/train" element={<TrainData/>}></Route>
-          <Route path="/admin" element={<Admin />}></Route>
+          <Route path="/login" element={<Login />}></Route>
 
           <Route element={<ProtectedRoutes/>}>
-            <Route path="/dashboard" element={} />
+            <Route path="/admin" element={<Admin />} />
           </Route>
 
           <Route path="/*" element={<h1>Page not Found. Return to home page.</h1>}></Route>
