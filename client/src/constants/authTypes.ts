@@ -2,11 +2,12 @@ import { ReactNode } from 'react';
 
 interface User {
   username: string,
-  email: string,
+  password: string,
 }
 
 interface AuthContextType {
   user: User | null;
+  //token: string;
   login: (userData: User) => Promise<void>;
   logout: () => void;
   loading: boolean;

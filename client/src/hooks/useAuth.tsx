@@ -1,12 +1,23 @@
-import { useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import type { User, AuthContextType, AuthProviderProps } from '../constants/authTypes.ts';
+import api from '../api/api.ts';
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider( { children }: AuthProviderProps){
   const [user, setUser] = useState<User | null>(null);
+  //const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<bool>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const verifyToken = async (): void => {
+    try {
+      const res = await api.post('/auth', {})
+
+    } catch (error) {
+      console.error("There was an error verifying the token,", error);
+    }
+  }
 
   const login = async (userData: User): Promise<void> => {
     try {
@@ -14,8 +25,9 @@ export function AuthProvider( { children }: AuthProviderProps){
 
 
       //const res = await authService
+      // should add authentication here
       setUser(userData);
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('user', JSON.stringify(userData));
     } catch (error) {
       setError('Failed to log user in');
     } finally {
@@ -27,6 +39,15 @@ export function AuthProvider( { children }: AuthProviderProps){
     localStorage.removeItem('user');
     setErorr(null);
   } 
+
+  /*useEffect(() => {
+    if(token){
+      verifyToken();
+    }
+    else {
+      setLoading(false);
+    }
+  }, [token])*/
 
   useEffect(() => {
     try {
