@@ -2,14 +2,14 @@ import sklearn
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
-from osu_db import get_data_osu_db, insert_tag_osu_db, exists_osu_db, insert_data_osu_db
+from db import get_data_osu_db, insert_tag_osu_db, exists_osu_db, insert_data_osu_db
 from parse import parse_osu_file
 from data import download_osu_data
 
 # this will download and parse osu data and store it in the database
 def insertDataById(beatmap_id, typ):
     insert_tag_osu_db(typ, beatmap_id)
-    if exists_osu_dbdb(beatmap_id):
+    if exists_osu_db(beatmap_id):
         print("Beatmap ID", beatmap_id, "is already in the database.")
         return
     data = download_osu_data(beatmap_id)

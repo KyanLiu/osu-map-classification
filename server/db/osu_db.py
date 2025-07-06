@@ -144,7 +144,7 @@ def get_data_osu_db():
     rows = cur.fetchall()
     names = [list(row)[:2] for row in rows]  
     data = [list(row)[2:] for row in rows]  
-    unordered_tags = get_tags_db()
+    unordered_tags = get_tags_osu_db()
     tags = []
     for i in names:
         tags.append(unordered_tags[i[0]])

@@ -1,0 +1,1 @@
+from .mapType import getMapClasses

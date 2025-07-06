@@ -35,4 +35,4 @@ mapClasses = {
     3970329: ["flow aim", "stream", "consistency"],
     668662: ["stream", "burst", "consistency"]
 }
-getMapClasses()
+#getMapClasses()

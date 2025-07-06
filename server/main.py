@@ -1,7 +1,6 @@
 from typing import Union
 from fastapi import FastAPI
-from api.submissions import router as submissions_router
-from api.training import router as training_router
+from api import training_router, submissions_router
 
 app = FastAPI()
 app.include_router(submissions_router, prefix='/api')

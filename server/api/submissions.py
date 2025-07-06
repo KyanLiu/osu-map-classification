@@ -1,10 +1,11 @@
 from fastapi import APIRouter
-from front_db import add_submission, retrieve_submissions
+from db import add_submission, retrieve_submissions
 from pydantic import BaseModel
+from typing import List
 
 router = APIRouter()
 
-Class SubmissionData(BaseModel):
+class SubmissionData(BaseModel):
     tags: List[str]
     beatmapId: int
 
