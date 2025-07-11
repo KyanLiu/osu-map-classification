@@ -5,15 +5,19 @@ import MapClassButton from '../../components/MapClassButton/MapClassButton.tsx';
 
 
 const TrainData = () => {
-  const [beatmapId, setBeatmapId] = useState<number | null>(null)
+  const [beatmapId, setBeatmapId] = useState<number | ''>('')
   const [tags, setTags] = useState<string[]>([]);
 
 
   const submitTrainData = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const res = await api.post('/api/submissions', {beatmapId: beatmapId, tags: tags});
+      console.log({beatmapId: beatmapId, tags: tags})
+      const res = await api.post('/api/create-submissions', {beatmapId: beatmapId, tags: tags});
       alert("The beatmap ", beatmapId, " has been added processing stage.")
+      // tags should be reset
+      setTags([]);
+      setBeatmapId('')
     }
     catch(error) {
       console.log("There was an error processing the beatmap with Id:", beatmapId);
@@ -31,16 +35,20 @@ const TrainData = () => {
     }
   }
 
+  const clearTagSelection = () => {
+
+  }
+
   return (
     <div>
       <p>This is the page to train data</p>
       <form onSubmit={submitTrainData}>
         <label>Enter the map beatmap id:
-          <input type="number" required onChange={(event) => setBeatmapId(Number(event.target.value))} />
+          <input type="number" required value={beatmapId} onChange={(event) => setBeatmapId(Number(event.target.value))} />
         </label>
         <div>
           {mapTag.map((tag) => (
-            <MapClassButton key={tag} tag={tag} tagPick={handleTagSelection}  />))}
+            <MapClassButton key={tag} tag={tag} all_tags={tags} tagPick={handleTagSelection}  />))}
         </div>
         <button type="submit">Train</button>
       </form>

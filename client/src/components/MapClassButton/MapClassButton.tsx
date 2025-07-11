@@ -2,15 +2,17 @@ import type { Tag } from "../../constants/mapTags";
 import { useState, useEffect } from 'react';
 import './MapClassButton.css';
 
-const MapClassButton = ({ tag, tagPick }: { tag: Tag; tagPick: (tag: Tag) => void }) => {
+const MapClassButton = ({ tag, tagPick, all_tags }: { tag: Tag; all_tags: string[] ;tagPick: (tag: Tag) => void }) => {
   const [selected, setSelected] = useState<bool>(false)
   const pressedButton = () => {
     tagPick(tag);
     setSelected(!selected); 
   }
   useEffect(() => {
-    console.log("Selected")
-  }, [selected])
+    if(all_tags.length == 0){
+      setSelected(false);
+    }
+  }, [all_tags])
 
   return (
     <div>

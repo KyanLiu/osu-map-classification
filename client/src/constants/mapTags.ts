@@ -5,6 +5,7 @@ const mapTag: Tag[] = [
     'speed',
     'jump aim',
     'stream',
+    'spaced stream',
     'burst',
     'tech',
     'flow aim'
