@@ -1,7 +1,14 @@
 import sqlite3
-import numpy as np
-con = sqlite3.connect("osu_class_data.db")
+con = sqlite3.connect("./db/osu_class_data.db")
 cur = con.cursor()
+
+def build_submit_db():
+    cur.execute("""
+        CREATE TABLE submissions_data (
+            possible_map_type TEXT,
+            beatmap_id INTEGER
+        )
+        """) 
 
 def add_submission(possible_tag, beatmap_id):
     cur.execute("""
@@ -11,16 +18,8 @@ def add_submission(possible_tag, beatmap_id):
     result = cur.fetchone()
     if result:
         return
-    cur.execute("INSERT INTO submissions_data VALUES(?, ?)", [tag, beatmap_id])
+    cur.execute("INSERT INTO submissions_data VALUES(?, ?)", [possible_tag, beatmap_id])
     con.commit()
-
-def build_submit_db():
-    cur.execute("""
-        CREATE TABLE submissions_data (
-            possible_map_type TEXT,
-            beatmap_id INTEGER
-        )
-        """) 
 
 def retrieve_submissions():
     cur.execute("SELECT * FROM submissions_data")
@@ -33,3 +32,4 @@ def retrieve_submissions():
         else:
             cata[i[1]].append(i[0])
     return cata
+#build_submit_db()

@@ -1,9 +1,15 @@
 from fastapi import APIRouter
 from train import insertDataById
+from pydantic import BaseModel
+from typing import List
 
 router = APIRouter()
 
-@router.get('/train/')
-async def train_beatmap(beatmapId: int):
-    insertDataById(beatmapId)
-    return {"status": "Training started", "training beatmapId": beatmapId}
+class TrainData(BaseModel):
+    beatmapId: int
+    labels: List[str]
+
+@router.post('/train')
+async def train_beatmap(traindata: TrainData):
+    #insertDataById(beatmapId)
+    return {"status": "Training started", "training beatmapId": traindata.beatmapId}

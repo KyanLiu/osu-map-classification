@@ -37,4 +37,4 @@ def train():
     print(clf.predict(X_test))
     # this returns the data needed
     #new_train_data = connect_tags(standardized_data)
-train()
+#train()
