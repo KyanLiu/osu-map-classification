@@ -11,5 +11,5 @@ class TrainData(BaseModel):
 
 @router.post('/train')
 async def train_beatmap(traindata: TrainData):
-    #insertDataById(beatmapId)
+    insertDataById(traindata.beatmapId, traindata.labels)
     return {"status": "Training started", "training beatmapId": traindata.beatmapId}
