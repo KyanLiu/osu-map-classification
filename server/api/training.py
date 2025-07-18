@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from db import delete_submission
 from train import insertDataById
 from pydantic import BaseModel
 from typing import List
@@ -11,5 +12,7 @@ class TrainData(BaseModel):
 
 @router.post('/train')
 async def train_beatmap(traindata: TrainData):
-    insertDataById(traindata.beatmapId, traindata.labels)
+    delete_submission('staged_data', traindata.beatmapId)
+    for i in traindata.labels:
+        insertDataById(traindata.beatmapId, i)
     return {"status": "Training started", "training beatmapId": traindata.beatmapId}

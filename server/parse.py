@@ -3,9 +3,7 @@ import os
 import sys
 import numpy as np
 sys.path.append('assets')
-from KNN import KNearestNeighbors
-from assets import getMapClasses
-from data import download_osu_data
+
 
 def ncr(n, i):
     curN = 1

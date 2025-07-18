@@ -36,8 +36,15 @@ def retrieve_submissions(table_name):
         fn.append([i, cata[i]])
     return fn
 
+def delete_submission(table_name, beatmap_id):
+    cur.execute(f"""
+        DELETE FROM {table_name} WHERE beatmap_id = ?
+                """, [beatmap_id])
+    con.commit()
 
 #build_submit_db('staged_data')
 #cur.execute("DROP TABLE submissions_data")
 #res = cur.execute("SELECT * FROM submissions_data")
 #print(res.fetchall())
+#delete_submission('submissions_data', 4904540)
+

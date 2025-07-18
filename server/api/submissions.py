@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from db import add_submission, retrieve_submissions
+from db import add_submission, retrieve_submissions, delete_submission
 from pydantic import BaseModel
 from typing import List
 
@@ -26,6 +26,11 @@ async def get_submissions():
     data = retrieve_submissions('submissions_data')
     return {"submissions": data}
 
+@router.delete('/delete-submission/{beatmap_id}')
+async def delete_submission_data(beatmap_id: int):
+    delete_submission('submissions_data', beatmap_id)
+    return {"status": "deleted the saved submissions"}
+
 @router.get('/staged-submissions')
 async def get_staged_submissions():
     data = retrieve_submissions('staged_data')
@@ -33,6 +38,12 @@ async def get_staged_submissions():
 
 @router.post('/stage-submissions')
 async def create_staged_submission(staged_data: SubmissionData):
+    delete_submission('submissions_data', staged_data.beatmapId)
     for i in staged_data.tags:
         add_submission('staged_data', i, staged_data.beatmapId)
     return {"status": "saved staged beatmaps and tags"}
+
+@router.delete('/delete-staged/{beatmap_id}')
+async def delete_staged_data(beatmap_id: int):
+    delete_submission('staged_data', beatmap_id)
+    return {"status": "deleted the staged submissions"}

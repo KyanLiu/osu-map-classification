@@ -13,7 +13,6 @@ mapClasses = {
     "linkinpark_breakingthehabit_turbokolab.osu": [0, 1, 0, 0, 0, 0, 0],
     "thelivingtombstone_goodbyemoonmen_cyb3rsomniverse.osu": [0, 1, 0, 0, 0, 0, 0],
 }
-'''
 
 def getMapClasses():
     data = {}
@@ -35,4 +34,6 @@ mapClasses = {
     3970329: ["flow aim", "stream", "consistency"],
     668662: ["stream", "burst", "consistency"]
 }
+
+'''
 #getMapClasses()
