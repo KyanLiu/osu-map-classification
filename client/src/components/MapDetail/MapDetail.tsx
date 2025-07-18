@@ -1,27 +1,37 @@
 import api from '../../api/api.ts';
+import './MapDetail.css';
+import { useState } from 'react';
+import { type Submission } from '../../constants/types.ts';
 
-const MapDetail = ({ id, tags, staged }: { id: number; tags: string[]; staged: boolean}) => {
-  
-  const submitButton = async () => {
-    if (staged){
-      const res = await api.post('/api/train', {beatmapId: id, labels: tags});
-      alert('The staged data has been added to the training set')
-    }
-    else {
-      const res = await api.post('/api/stage-submissions', {beatmapId: id, tags: tags});
-      alert('The submission data has been added to the staged data')
-    } 
+const MapDetail = ({ id, tags, staged, submitButton, deleteButton, checkboxSelect }: {
+  id: number; 
+  tags: string[]; 
+  staged: boolean; 
+  submitButton: (beatmapId: number, tags: string[], refreshNow: boolean) => void; 
+  deleteButton: (beatmapId: number, refreshNow: boolean) => void;
+  checkboxSelect: (sub: Submission) => void  
+}) => {
+
+  const [checked, setChecked] = useState<boolean>(false);
+
+  const checkboxBtn = () => {
+    setChecked(!checked);
+    checkboxSelect([id, tags] as Submission);
   }
-  // there should be a delete option after submitting the data to the backend, also must refresh as well
+
+  
+
   return (
-    <div>
+    <div className='mapDetailContainer'>
+      <input type="checkbox" checked={checked} onChange={checkboxBtn}/>
       <p>Beatmap Id:{id}</p>
       {tags.map((typ) => {
         return <div>{typ}</div>
       })}
-      <button type="button" onClick={submitButton}>
+      <button type="button" onClick={() => submitButton(id, tags, true)}>
         {staged ? 'Train Data' : 'Stage Change'}
       </button>
+      <button type="button" onClick={() => deleteButton(id, true)}>Delete</button>
     </div>
 
   )

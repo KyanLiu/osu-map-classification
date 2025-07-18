@@ -2,17 +2,87 @@ import { useState, useEffect } from 'react';
 import Logout from '../../components/Logout/Logout.tsx';
 import api from '../../api/api.ts';
 import MapDetail from '../../components/MapDetail/MapDetail.tsx';
+import { type Submission } from '../../constants/types.ts';
 
-type Submission = [number, string[]][]
 
 const Admin = () => {
   const [submissions, setSubmissions] = useState<Submission>([]);
   const [staged, setStaged] = useState<Submission>([]);
   const [tab, setTab] = useState<boolean>(false);
+  const [refresh, setRefresh] = useState<number>(0);
+  const [selected, setSelected] = useState<Submission[]>([]);
 
-  /*const updateSubmission = (staged: boolean, tag: boolean) => {
-    // it should be removed from the backend as well
-  }*/
+  const submitButton = async (beatmapId: number, tags: string[], refreshNow: boolean) => {
+    if (tab) {
+      const res = await api.post('/api/train', {beatmapId: beatmapId, labels: tags});
+    }
+    else {
+      const res = await api.post('/api/stage-submissions', {beatmapId: beatmapId, tags: tags});
+    }
+    if(refreshNow){
+      if(tab) {
+        alert('The staged data has been added to the training set')
+      } else {
+        alert('The submission data has been added to the staged data')
+      }
+      callRefresh();
+    }
+  }
+  const multiSelectSubmit = () => {
+    for (const sub of selected){
+      submitButton(sub[0], sub[1], false);
+    }
+    if(tab) {
+      alert('The selected staged data has been added to the training set')
+    } else {
+      alert('The selected submission data has been added to the staged data')
+    }
+    callRefresh();
+  }
+
+  const deleteSingleSubmission = async (beatmapId: number, refreshNow: boolean) => {
+    if (tab) {
+      const res = await api.delete(`/api/delete-staged/${beatmapId}`);
+    }
+    else {
+      const res = await api.delete(`/api/delete-submission/${beatmapId}`);
+    }
+    if(refreshNow){
+      alert('The data has been deleted from the database')
+      callRefresh();
+    }
+  }
+
+  const deleteSubmissions = () => {
+    for (const sub of selected){
+      deleteSingleSubmission(sub[0], false);
+    }
+    if(tab) {
+      alert('The selected staged data has been deleted from the database')
+    } else {
+      alert('The selected submissions data has been deleted from the database')
+    }
+    callRefresh();
+  }
+
+  const handleSubmissionSelection = (data: Submission) => {
+    for (const sub of selected) {
+      if (JSON.stringify(sub) == JSON.stringify(data)) {
+        setSelected(selected.filter(s => JSON.stringify(s) != JSON.stringify(data)));
+        return;
+      }
+    }
+    setSelected([...selected, data]);
+  }
+
+  const callRefresh = () => {
+    setRefresh(prev => prev + 1);
+  }
+  const changeTab = () => {
+    setTab(!tab);
+    setSelected([]);
+    // tab should refresh the multi select
+  }
 
   useEffect(() => {
     const fetchSubmissions = async () => {
@@ -22,32 +92,47 @@ const Admin = () => {
     }
     const fetchStagedChanges = async () => {
       const res = await api.get('/api/staged-submissions');
-      console.log('Staged submissiosn', res.data.submissions);
+      console.log('Staged submissions', res.data.submissions);
       setStaged(res.data.submissions);
     }
     fetchSubmissions()
     fetchStagedChanges()
-  }, []) // this should refresh everytime a submission is made, need to remove this particular instance
+  }, [refresh])
 
   return (
     <div>
       <h2>This is the admin dashboard page</h2>
-      <button type="button" onClick={() => setTab(!tab)}>
+      <button type="button" onClick={changeTab}>
         {tab ? "View New Submissions" : "View Staged Data"}
       </button>
+      <div>
+        {(selected.length != 0) && (
+          <div>
+            <button type="button" onClick={multiSelectSubmit}>{tab ? 'Train Selected' : 'Stage Selected'}</button>
+            <button type="button" onClick={deleteSubmissions}>Delete Selected</button>
+          </div>
+        )}
+      </div>
       {
         tab ? (
           <div>
             <p>Here are the staged changes</p> 
             {staged.map((cur) => {
-              return <MapDetail key={cur[0]} id={cur[0]} tags={cur[1]} staged={true}/>
+              return <MapDetail 
+                        key={cur[0]}
+                        id={cur[0]}
+                        tags={cur[1]}
+                        staged={true}
+                        submitButton={submitButton}
+                        deleteButton={deleteSingleSubmission}
+                        checkboxSelect={handleSubmissionSelection} />
             })}
           </div>
         ) : (
           <div>
             <p>Here are the new submissions:</p>
             {submissions.map((cur) => {
-              return <MapDetail key={cur[0]} id={cur[0]} tags={cur[1]} staged={false} />
+              return <MapDetail key={cur[0]} id={cur[0]} tags={cur[1]} staged={false} submitButton={submitButton} checkboxSelect={handleSubmissionSelection} />
             })}
           </div>
         )
