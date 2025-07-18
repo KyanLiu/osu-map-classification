@@ -25,7 +25,7 @@ const TrainData = () => {
 
   }
 
-// actually this should be sent to the admin dashboard before actually training
+  // there should be some type of beatmap validation process
 
   const handleTagSelection = (tag: string) => {
     if (tags.includes(tag)) {
@@ -33,10 +33,6 @@ const TrainData = () => {
     } else {
       setTags([...tags, tag]);
     }
-  }
-
-  const clearTagSelection = () => {
-
   }
 
   return (

@@ -8,7 +8,10 @@ const mapTag: Tag[] = [
     'spaced stream',
     'burst',
     'tech',
-    'flow aim'
+    'flow aim',
+    'aim slop',
+    'stamina',
+    'reading'
 ] 
 
 export { mapTag };
