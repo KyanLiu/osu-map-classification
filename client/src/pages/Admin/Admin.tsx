@@ -13,19 +13,24 @@ const Admin = () => {
   const [selected, setSelected] = useState<Submission[]>([]);
 
   const submitButton = async (beatmapId: number, tags: string[], refreshNow: boolean) => {
-    if (tab) {
-      const res = await api.post('/api/train', {beatmapId: beatmapId, labels: tags});
-    }
-    else {
-      const res = await api.post('/api/stage-submissions', {beatmapId: beatmapId, tags: tags});
-    }
-    if(refreshNow){
-      if(tab) {
-        alert('The staged data has been added to the training set')
-      } else {
-        alert('The submission data has been added to the staged data')
+    try {
+
+      if (tab) {
+        const res = await api.post('/api/train', {beatmapId: beatmapId, labels: tags});
       }
-      callRefresh();
+      else {
+        const res = await api.post('/api/stage-submissions', {beatmapId: beatmapId, tags: tags});
+      }
+      if(refreshNow){
+        if(tab) {
+          alert('The staged data has been added to the training set')
+        } else {
+          alert('The submission data has been added to the staged data')
+        }
+        callRefresh();
+      }
+    } catch (error) {
+      console.error('There was an error submitting the data', error);
     }
   }
   const multiSelectSubmit = () => {
@@ -41,15 +46,19 @@ const Admin = () => {
   }
 
   const deleteSingleSubmission = async (beatmapId: number, refreshNow: boolean) => {
-    if (tab) {
-      const res = await api.delete(`/api/delete-staged/${beatmapId}`);
-    }
-    else {
-      const res = await api.delete(`/api/delete-submission/${beatmapId}`);
-    }
-    if(refreshNow){
-      alert('The data has been deleted from the database')
-      callRefresh();
+    try {
+      if (tab) {
+        const res = await api.delete(`/api/delete-staged/${beatmapId}`);
+      }
+      else {
+        const res = await api.delete(`/api/delete-submission/${beatmapId}`);
+      }
+      if(refreshNow){
+        alert('The data has been deleted from the database')
+        callRefresh();
+      }
+    } catch (error) {
+      console.error('There was an error deleting the data', error);
     }
   }
 
@@ -77,6 +86,7 @@ const Admin = () => {
 
   const callRefresh = () => {
     setRefresh(prev => prev + 1);
+    setSelected([]);
   }
   const changeTab = () => {
     setTab(!tab);
@@ -86,14 +96,22 @@ const Admin = () => {
 
   useEffect(() => {
     const fetchSubmissions = async () => {
-      const res = await api.get('/api/retrieve-submissions');
-      console.log('New submissions', res.data.submissions);
-      setSubmissions(res.data.submissions);
+      try {
+        const res = await api.get('/api/retrieve-submissions');
+        console.log('New submissions', res.data.submissions);
+        setSubmissions(res.data.submissions);
+      } catch (error) {
+        console.error('There was an error fetching the submissions data', error);
+      }
     }
     const fetchStagedChanges = async () => {
-      const res = await api.get('/api/staged-submissions');
-      console.log('Staged submissions', res.data.submissions);
-      setStaged(res.data.submissions);
+      try {
+        const res = await api.get('/api/staged-submissions');
+        console.log('Staged submissions', res.data.submissions);
+        setStaged(res.data.submissions);
+      } catch (error) {
+        console.error('There was an error fetching the staged data', error);
+      }
     }
     fetchSubmissions()
     fetchStagedChanges()
