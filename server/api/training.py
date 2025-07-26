@@ -17,8 +17,8 @@ async def train_beatmap(traindata: TrainData):
         insertDataById(traindata.beatmapId, i)
     return {"status": "Training started", "training beatmapId": traindata.beatmapId}
 
-@router.post('/classify-map{beatmap_id}')
-async def classify_map_request(beatmap_id: int):
+#@router.post('/classify-map{beatmap_id}')
+#async def classify_map_request(beatmap_id: int):
     #labels = some request function
     #return { "labels": }
 

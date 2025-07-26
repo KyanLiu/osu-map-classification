@@ -1,1 +1,1 @@
-from .mapType import getMapClasses
+from .mapType import mapFeatureDetails

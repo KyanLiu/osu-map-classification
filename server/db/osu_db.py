@@ -74,8 +74,7 @@ def get_tags_osu_db():
     return cata
 
 def get_data_osu_db():
-    print("test")
-    res = cur.execute("SELECT * FROM osu_raw_data")
+    cur.execute("SELECT * FROM osu_raw_data")
     rows = cur.fetchall()
     names = [list(row)[:2] for row in rows]  
     data = [list(row)[2:] for row in rows]  
@@ -92,9 +91,9 @@ def get_data_osu_db():
 #standardize_data()
 #res = cur.execute("SELECT name FROM sqlite_master")
 #res = cur.execute("SELECT * FROM osu_raw_data")
-res = cur.execute("SELECT * FROM osu_tags_data")
+#res = cur.execute("SELECT * FROM osu_tags_data")
 #print(res.fetchone())
-print(res.fetchall())
+#print(res.fetchall())
 #cur.execute("DROP TABLE osu_raw_data")
 #cur.execute("DROP TABLE osu_tags_data")
 #build_osu_db()

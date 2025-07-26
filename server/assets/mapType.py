@@ -1,9 +1,26 @@
-import os
 
 # Map conversion Array:
 # [Speed, Aim, Tech, Flow Aim, Stream, Burst, Consistency]
 mapConversion = ["speed", "jump aim", "tech", "flow aim", "stream", "burst", "consistency"]
 # add precision (circle size)
+
+mapFeatureDetails = [
+    'CircleSize',
+    'OverallDifficulty',
+    'ApproachRate',
+    'SliderMultiplier',
+    'SliderTickRate',
+    'SliderObjectRatio',
+    'AvgNoteDist',
+    'AvgBPM',
+    'AvgSliderVelocity',
+    'MapLength',
+    'MapDensity',
+    'StreamDensity',
+    'BurstDensity',
+    'SpacedStreamDensity',
+    'FlowAimDensity',
+]
 
 '''
 mapClasses = {
