@@ -1,1 +1,1 @@
-osu map recommender - work in progress
+osu beatmap recommender - work in progress
