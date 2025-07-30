@@ -5,9 +5,12 @@ from pathlib import Path
 from sklearn.preprocessing import StandardScaler, MultiLabelBinarizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, hamming_loss
+from sklearn.multioutput import MultiOutputClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_selection import SequentialFeatureSelector
+from sklearn.feature_selection import SelectFromModel
 from db import get_data_osu_db, insert_tag_osu_db, exists_osu_db, insert_data_osu_db
 from parse import parse_osu_file
 from data import download_osu_data
@@ -27,25 +30,43 @@ def insertDataById(beatmap_id, typ):
 class OsuModel:
     def __init__(self):
         self.model = None
-        self.scalar = None
+    def load(self):
+        if self.model is None:
+            try:
+                self.model = joblib.load('osu_model_package.pkl')
+                print('Loaded model from osu_model_package')
+            except FileNotFoundError:
+                self.train()
     
     def train(self):
         names, X, y = get_data_osu_db()
-        # only choose the best 7 based on tested data
+        # only choose the best 7 features based on tested data
         mul = MultiLabelBinarizer()
         y_bin = mul.fit_transform(y)
-        # take only the 7 features
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
 
-        #scaler = StandardScaler()
-        #X_scaled = scaler.fit_transform(X)
+        select = SelectFromModel(RandomForestClassifier(n_estimators=20), max_features=7)
+        X_scaled_lim = select.fit_transform(X_scaled, y_bin)
 
+        rfc = RandomForestClassifier(n_estimators=20)
+        rfc.fit(X_scaled_lim, y_bin)
 
+        lr = MultiOutputClassifier(LogisticRegression(C=0.1, penalty='l2', solver='liblinear', max_iter=1000))
+        lr.fit(X_scaled_lim, y_bin)
 
-        #clf = RandomForestClassifier(n_estimators=10, random_state=0)
-        #clf.fit(X_scaled, y_bin)
-        #select = SelectFromModel(clf, max_features=7)
-        #X_train_lim = select.fit_transform(X_train_scaled, y_train_bin)
+        svm = MultiOutputClassifier(SVC(C=10, gamma=0.01, kernel='rbf'))
+        svm.fit(X_scaled_lim, y_bin)
 
+        # save models
+        model_package = {
+            'rfc': rfc,
+            'lr': lr,
+            'svm': svm
+        }
+        joblib.dump(model_package, 'osu_model_package.pkl')
+        self.model = model_package
+        print('The model has been trained and saved to osu_model_package')
 
     def test(self):
         names, X, y = get_data_osu_db()
@@ -59,40 +80,22 @@ class OsuModel:
         clf = RandomForestClassifier(n_estimators=10, random_state=0) # which classifier?, maybe include the classifier name as a param
         clf.fit(X_train_scaled, y_train_bin)
         print('Average fraction of incorrect labels: ', hamming_loss(clf.predict(X_test_scaled), y_test_bin))
-    def predict_class():
-        #if not model_trained()
-        print('Here is where i will predict using the already loaded models')
+
+    def predict_class(self, X):
+        if self.model is None:
+            self.load()
+        rfc = self.model.rfc 
+        lr = self.model.lr
+        svm = self.model.svm
+
+        print(rfc.predict(X))
+
+        #print('Here is where i will predict using the already loaded models')
+        # X is just an array of standardized features?
+        # now we need to to test for it to return features
 
 osu_model = OsuModel()
-osu_model.train()
+osu_model.load()
 
-'''
-def train():
-    # this will train and save to the model
-
-
-    #clf = KNeighborsClassifier(n_neighbors=3)
-
-
-    sfs = SequentialFeatureSelector()
-
-
-    importances = clf.feature_importances_
-    indices = np.argsort(importances)[::-1]
-    for f in range(X_train_scaled.shape[1]):
-        print(conv[indices[f]], [importances[indices[f]]])
-    
-    # time to test with less features
-    
-
-    
-    #print(clf.predict(X_test))
-    # this returns the data needed
-    #new_train_data = connect_tags(standardized_data)
-
-    # from sklearn.metrics import accuracy_score
-    # accuracy_score(y_test, y_pred)
-#train()
-def load_model():
-'''
-
+X_temp = []
+#osu_model.predict_class(X)
