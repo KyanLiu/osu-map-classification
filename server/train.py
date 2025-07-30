@@ -27,6 +27,14 @@ def insertDataById(beatmap_id, typ):
     map_osu_details = parse_osu_file(data, beatmap_id)
     insert_data_osu_db(map_osu_details)
 
+def shapePredictData(beatmap_id):
+    data = download_osu_data(beatmap_id)
+    details = parse_osu_file(data, beatmap_id)
+    just_val = [i[1] for i in details[2:]]
+    return just_val
+
+#shapePredictData(2654458)
+
 class OsuModel:
     def __init__(self):
         self.model = None
@@ -58,11 +66,18 @@ class OsuModel:
         svm = MultiOutputClassifier(SVC(C=10, gamma=0.01, kernel='rbf'))
         svm.fit(X_scaled_lim, y_bin)
 
+        knn = KNeighborsClassifier(n_neighbors=3)
+        knn.fit(X_scaled_lim, y_bin)
+
         # save models
         model_package = {
             'rfc': rfc,
             'lr': lr,
-            'svm': svm
+            'svm': svm,
+            'knn': knn,
+            'mul': mul,
+            'scaler': scaler,
+            'select': select
         }
         joblib.dump(model_package, 'osu_model_package.pkl')
         self.model = model_package
@@ -84,18 +99,67 @@ class OsuModel:
     def predict_class(self, X):
         if self.model is None:
             self.load()
-        rfc = self.model.rfc 
-        lr = self.model.lr
-        svm = self.model.svm
+        rfc = self.model['rfc']
+        lr = self.model['lr']
+        svm = self.model['svm']
+        knn = self.model['knn']
+        mul = self.model['mul']
+        scaler = self.model['scaler']
+        select = self.model['select']
 
-        print(rfc.predict(X))
+        X_scaled = scaler.transform(X)
+        X_scaled_lim = select.transform(X_scaled)
 
-        #print('Here is where i will predict using the already loaded models')
-        # X is just an array of standardized features?
-        # now we need to to test for it to return features
+        '''
+        print(rfc.predict(X_scaled_lim))
+        print(lr.predict(X_scaled_lim))
+        print(svm.predict(X_scaled_lim))
+        print(knn.predict(X_scaled_lim))
+        '''
+        pred_rfc = list(mul.inverse_transform(rfc.predict(X_scaled_lim))[0])
+        pred_lr = list(mul.inverse_transform(lr.predict(X_scaled_lim))[0])
+        pred_svm = list(mul.inverse_transform(svm.predict(X_scaled_lim))[0])
+        pred_knn = list(mul.inverse_transform(knn.predict(X_scaled_lim))[0])
+        total = [pred_rfc, pred_lr, pred_svm, pred_knn]
+        print(total)
+        return total
 
-osu_model = OsuModel()
-osu_model.load()
+    def find_map(self, X):
+        if self.model is None:
+            self.load()
+        rfc = self.model['rfc']
+        lr = self.model['lr']
+        svm = self.model['svm']
+        knn = self.model['knn']
+        mul = self.model['mul']
+        scaler = self.model['scaler']
+        select = self.model['select']
 
-X_temp = []
-#osu_model.predict_class(X)
+        X_scaled = scaler.transform(X)
+        X_scaled_lim = select.transform(X_scaled)
+
+        names, X_tot, y_tot = get_data_osu_db()
+
+        dist, ind = knn.kneighbors(X_scaled_lim, n_neighbors=3, return_distance=True)
+        # this function should filter out if it is the same map
+        maps_knn = []
+        for i in range(len(ind[0])):
+            if dist[0][i] == 0:
+                # remove the same map
+                continue
+            val = ind[0][i]
+            maps_knn.append(names[val])
+
+        print(maps_knn)
+        total = [maps_knn]
+        return total
+
+
+#osu_model = OsuModel()
+#osu_model.load()
+
+
+
+
+#X_temp = [[4.0, 8.2, 9.6, 2.3, 1.0, 0.24292845257903495, 105.77073719529389, 175.81999999999996, 1.039817193344276, 163889, 0.007334232315774701, 0.415973377703827, 0.1497504159733777, 0.498, 0.6938435940099834]]
+#osu_model.find_map(X_temp)
