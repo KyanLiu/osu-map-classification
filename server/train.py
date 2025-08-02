@@ -120,7 +120,7 @@ class OsuModel:
         pred_lr = list(mul.inverse_transform(lr.predict(X_scaled_lim))[0])
         pred_svm = list(mul.inverse_transform(svm.predict(X_scaled_lim))[0])
         pred_knn = list(mul.inverse_transform(knn.predict(X_scaled_lim))[0])
-        total = [pred_rfc, pred_lr, pred_svm, pred_knn]
+        total = [['rfc', pred_rfc], ['lr', pred_lr], ['svm', pred_svm], ['knn', pred_knn]]
         print(total)
         return total
 
