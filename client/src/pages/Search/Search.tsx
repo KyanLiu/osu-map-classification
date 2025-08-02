@@ -1,9 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import api from '../../api/api.ts';
+import type { Tags, Map } from '../../constants/types.ts';
+import Carousel from '../../components/Carousel/Carousel.tsx';
+
+type ModelTags = [string, Tags][]
+type ModelMaps = Map[]
 
 const Search = () => {
   // tab = True => Find Similar Maps, tab = False => Classify Maps
   const [tab, setTab] = useState<boolean>(false);
   const [beatmapId, setBeatmapId] = useState<number | ''>('');
+  const [tags, setTags] = useState<ModelTags>([]);
+  const [maps, setMaps] = useState<ModelMaps[]>([]);
 
   const changeTab = () => {
     setTab(!tab);
@@ -13,10 +21,14 @@ const Search = () => {
     try {
       if (tab) {
         // find similar maps
+        const res = await api.post(`/api/find-map/${beatmapId}`)
+        setMaps(res.data.maps)
+        console.log(res.data.maps)
       } else {
         // classify map
+        const res = await api.post(`/api/classify-map/${beatmapId}`)
+        setTags(res.data.labels)
       }
-
     } catch(error) {
       console.error('There was an error searching for the beatmap', error);
     }
@@ -28,8 +40,34 @@ const Search = () => {
       <button type="button" onClick={changeTab}>
         {tab ? "Find Similar Maps" : "Classify Map"}
       </button>
-      <input type="number" required value={beatmapId} onChange={(event) => setBeatmapId(Number(event.target.value))} />
-      
+      <form onSubmit={findBeatmap}>
+        <label>Enter the map beatmap id:
+          <input type="number" required value={beatmapId} onChange={(event) => setBeatmapId(Number(event.target.value))} />
+        </label>
+        <button type="submit">{tab ? "Find" : "Classify"}</button>
+      </form>
+
+      { tab ? (
+        <div>
+          {maps.map((val, ind) => {
+            return <Carousel key={ind} maps={val} />
+          })}
+        </div>
+      ) : (
+        <div>
+          {tags.map((val) =>  {
+              return (
+                <div>
+                  <p>{val[0]}</p>
+                  {val[1].map((tag) => {
+                    return <p>{tag}</p>
+                  })}
+                </div>
+              )
+            })}
+        </div>
+      )}
+
     </div>
   )
 }
@@ -38,7 +76,6 @@ export default Search
 
 // instead of button it should be like a slider
 
-// everytime a beatmap is searched, and it is not within the database, it should be added
 // add a drop down for which model they want to use
 // a tab layout for classify map and find similar maps
 // it should provide a list of maps and do some like circular carousel action
