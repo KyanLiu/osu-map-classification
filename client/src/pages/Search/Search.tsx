@@ -19,19 +19,32 @@ const Search = () => {
   const findBeatmap = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      if (tab) {
-        // find similar maps
-        const res = await api.post(`/api/find-map/${beatmapId}`)
-        setMaps(res.data.maps)
-        console.log(res.data.maps)
-      } else {
-        // classify map
-        const res = await api.post(`/api/classify-map/${beatmapId}`)
-        setTags(res.data.labels)
+      const checkRes = await api.get(`/api/validate-id/${beatmapId}`);
+      const checkBeatMapId = checkRes.data.valid;
+      if (checkBeatMapId == 0){
+        alert('Please enter a valid beatmap Id');
+        setBeatmapId('')
+      }
+      else if (checkBeatMapId == 1){
+        alert('Please enter a valid osu standard beatmap Id');
+        setBeatmapId('')
+      }
+      else{
+        if (tab) {
+          // find similar maps
+          const res = await api.post(`/api/find-map/${beatmapId}`);
+          setMaps(res.data.maps);
+          console.log(res.data.maps);
+        } else {
+          // classify map
+          const res = await api.post(`/api/classify-map/${beatmapId}`);
+          setTags(res.data.labels);
+        }
       }
     } catch(error) {
       console.error('There was an error searching for the beatmap', error);
     }
+
   }
 
   return (
