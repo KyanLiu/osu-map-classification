@@ -9,6 +9,7 @@ const Carousel = ({ maps }: { maps: Map[] }) => {
   const updIndx = (): void => {
     const newIndx = (indx + 1) % maps.length;
     setIndx(newIndx);
+    console.log('click', indx)
   }
 
   useEffect(() => {
