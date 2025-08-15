@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import api from '../../api/api.ts';
-import type { Tags, Map } from '../../constants/types.ts';
-import Carousel from '../../components/Carousel/Carousel.tsx';
+import { useState } from 'react';
+import api from '../api/api.ts';
+import type { Tags, Map } from '../constants/types.ts';
+import Carousel from '../components/Carousel.tsx';
 
 type ModelTags = [string, Tags][]
 type ModelMaps = Map[]

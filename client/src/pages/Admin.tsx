@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import Logout from '../../components/Logout/Logout.tsx';
-import api from '../../api/api.ts';
-import MapDetail from '../../components/MapDetail/MapDetail.tsx';
-import { type Submission } from '../../constants/types.ts';
+import Logout from '../components/Logout.tsx';
+import api from '../api/api.ts';
+import MapDetail from '../components/MapDetail.tsx';
+import { type Submission } from '../constants/types.ts';
 
 
 const Admin = () => {

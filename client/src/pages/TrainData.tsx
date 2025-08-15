@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
-import api from '../../api/api.ts';
-import { mapTag } from '../../constants/mapTags.ts';
-import MapClassButton from '../../components/MapClassButton/MapClassButton.tsx';
+import { useState } from 'react'
+import api from '../api/api.ts';
+import { mapTag } from '../constants/mapTags.ts';
+import MapClassButton from '../components/MapClassButton.tsx';
 
 
 const TrainData = () => {
@@ -14,7 +14,7 @@ const TrainData = () => {
     try {
       console.log({beatmapId: beatmapId, tags: tags})
       const res = await api.post('/api/create-submissions', {beatmapId: beatmapId, tags: tags});
-      alert("The beatmap ", beatmapId, " has been added processing stage.")
+      alert(`The beatmap ${beatmapId} has been added to the processing stage.`)
       // tags should be reset
       setTags([]);
       setBeatmapId('')

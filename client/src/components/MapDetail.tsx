@@ -1,7 +1,5 @@
-import api from '../../api/api.ts';
-import './MapDetail.css';
 import { useState } from 'react';
-import { type Submission } from '../../constants/types.ts';
+import { type Submission } from '../constants/types.ts';
 
 const MapDetail = ({ id, tags, staged, submitButton, deleteButton, checkboxSelect }: {
   id: number; 

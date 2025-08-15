@@ -1,9 +1,8 @@
-import type { Tag } from "../../constants/mapTags";
+import type { Tag } from "../constants/mapTags";
 import { useState, useEffect } from 'react';
-import './MapClassButton.css';
 
 const MapClassButton = ({ tag, tagPick, all_tags }: { tag: Tag; all_tags: string[] ;tagPick: (tag: Tag) => void }) => {
-  const [selected, setSelected] = useState<bool>(false)
+  const [selected, setSelected] = useState<boolean>(false)
   const pressedButton = () => {
     tagPick(tag);
     setSelected(!selected); 

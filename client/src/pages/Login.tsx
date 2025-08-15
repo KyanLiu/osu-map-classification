@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth.tsx';
-import type { User } from '../../constants/authTypes.ts';
+import { useAuth } from '../hooks/useAuth.tsx';
+import type { User } from '../constants/authTypes.ts';
 
 const Login = () => {
   const { user, login, logout, loading, error } = useAuth();
@@ -9,7 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState<string>('');
   const navigate = useNavigate();
 
-  const submitLogin = async (event: React.FormEvent<HTMLFormELement>) => {
+  const submitLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       // it should process through using authentication

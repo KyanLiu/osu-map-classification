@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import type { Map } from '../../constants/types.ts';
-import api from '../../api/api.ts';
+import type { Map } from '../constants/types.ts';
+import api from '../api/api.ts';
 
 interface BeatmapData {
   id: number | null;
@@ -40,7 +40,9 @@ const MapDisplay = ({ detail }: { detail: Map }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const volumeControl = (): void => {
-    audioRef.current.volume = 0.5;
+    if (audioRef.current) {
+      audioRef.current.volume = 0.5;
+    }
   }
   
   useEffect(() => {

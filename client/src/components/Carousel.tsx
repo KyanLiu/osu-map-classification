@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import type { Map } from '../../constants/types.ts';
-import MapDisplay from '../MapDisplay/MapDisplay.tsx';
+import type { Map } from '../constants/types.ts';
+import MapDisplay from './MapDisplay.tsx';
 
 const Carousel = ({ maps }: { maps: Map[] }) => {
 
