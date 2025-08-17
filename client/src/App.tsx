@@ -17,7 +17,7 @@ function App() {
           <div className='min-h-screen'>
             <Navbar />
           </div>
-          <div>
+          <div className='grow px-5 py-10'>
             <Routes>
               <Route path="/" element={<Home/>}></Route>
               <Route path="/search" element={<Search/>}></Route>
