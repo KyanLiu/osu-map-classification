@@ -37,7 +37,9 @@ const TrainData = () => {
 
   return (
     <div>
-      <p>This is the page to train data</p>
+      <h1 className='text-left text-4xl'>Train Data</h1>
+      <p className='text-left text-lg '>This is the page to help us train data.</p>
+      <div className='border-b-2 my-5'></div>
       <form onSubmit={submitTrainData}>
         <label>Enter the map beatmap id:
           <input type="number" required value={beatmapId} onChange={(event) => setBeatmapId(Number(event.target.value))} />
