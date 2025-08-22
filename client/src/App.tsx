@@ -18,11 +18,11 @@ function App() {
             <div className='hidden sm:block fixed top-0 h-screen w-18'>
               <Navbar />
             </div>
-            <div className='sm:hidden fixed right-5 top-5'>
+            <div className='sm:hidden fixed right-5 top-5 z-20'>
               <Dropdown />
             </div>
           </div>
-          <div className='grow px-20 sm:ml-18 pt-20'>
+          <div className='px-20 sm:ml-18 lg:mx-auto py-20 max-w-5xl'>
             <Routes>
               <Route path="/" element={<Home/>}></Route>
               <Route path="/search" element={<Search/>}></Route>

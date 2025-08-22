@@ -14,10 +14,11 @@ const MapClassButton = ({ tag, tagPick, all_tags }: { tag: Tag; all_tags: string
   }, [all_tags])
 
   return (
-    <div>
-      <button type="button" onClick={pressedButton} className={selected ? 'tagSelect' : ''}>
-        {tag}
-      </button>
+    <div 
+      className={`select-none border-2 rounded-xl px-3 pt-1 pb-2 shadow-xl hover:scale-95 duration-200 cursor-pointer active:scale-85  ${selected ? 'text-black bg-white border-2 border-gray-200' : ''}`}
+      onClick={pressedButton}
+    >
+      <p>{tag}</p>
     </div>
   )
 }
