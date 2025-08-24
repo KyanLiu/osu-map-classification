@@ -22,7 +22,7 @@ function App() {
               <Dropdown />
             </div>
           </div>
-          <div className='px-20 sm:ml-18 lg:mx-auto py-20 max-w-5xl'>
+          <div className='px-20 sm:ml-18 lg:mx-auto py-20 max-w-5xl w-full'>
             <Routes>
               <Route path="/" element={<Home/>}></Route>
               <Route path="/search" element={<Search/>}></Route>
