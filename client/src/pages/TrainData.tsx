@@ -14,6 +14,11 @@ const TrainData = () => {
     event.preventDefault();
     try {
       console.log({beatmapId: beatmapId, tags: tags})
+      if(beatmapId == ""){
+        setError(0);
+        return;
+      }
+
       const checkRes = await api.get(`/api/validate-id/${beatmapId}`);
       const checkBeatMapId = checkRes.data.valid;
       setError(checkBeatMapId);
@@ -80,7 +85,7 @@ const TrainData = () => {
             <span className='text-red-500'>{error == 0 ? 'Please enter a valid beatmap Id' : 'Please enter a valid osu standard beatmap Id'}</span>
           )}
         </div>
-        <div className='max-w-2xl flex flex-wrap justify-center my-8 gap-5'>
+        <div className='max-w-2xl flex flex-wrap justify-center my-8 mx-auto gap-5'>
           {mapTag.map((tag) => (
             <MapClassButton key={tag} tag={tag} all_tags={tags} tagPick={handleTagSelection}  />))}
         </div>
