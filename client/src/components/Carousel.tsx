@@ -3,31 +3,11 @@ import type { Map } from '../constants/types.ts';
 import MapDisplay from './MapDisplay.tsx';
 
 const Carousel = ({ maps }: { maps: Map[] }) => {
-
-  const [ indx, setIndx ] = useState<number>(0);
-
-  const updIndx = (): void => {
-    const newIndx = (indx + 1) % maps.length;
-    setIndx(newIndx);
-    console.log('click', indx)
-  }
-
-  useEffect(() => {
-    console.log('maps', maps)
-  }, [maps])
-
   return (
-    <div>
-
-      
-      {maps && (maps.length > indx) && (
-        <div>
-          <MapDisplay detail={maps[indx]} />
-          <button onClick={updIndx}>&gt;</button>
-        </div>
-      )}
-
-
+    <div className='flex flex-col gap-12'>
+      {maps && maps.map((val, indx) => {
+        return <MapDisplay detail={maps[indx]} />
+      })}
     </div>
   )
 }

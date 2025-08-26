@@ -38,11 +38,22 @@ const MapDisplay = ({ detail }: { detail: Map }) => {
     title: null,
   });
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState<boolean>(false);
 
   const volumeControl = (): void => {
     if (audioRef.current) {
       audioRef.current.volume = 0.5;
     }
+  }
+
+  const toggleAudio = (): void => {
+    if(playing){
+      audioRef.current.pause();
+    }
+    else {
+      audioRef.current.play();
+    }
+    setPlaying(!playing);
   }
   
   useEffect(() => {
@@ -72,19 +83,55 @@ const MapDisplay = ({ detail }: { detail: Map }) => {
   }, [detail])
 
   return (
-    <div>
+    <div className='w-full bg-gray-800 rounded-xl shadow-lg overflow-hidden'>
       {beatmap?.url && <a href={beatmap.url} target="_blank">
-        {beatmap?.cover && <img src={beatmap.cover} />}
-        {beatmap?.title && <h1>{beatmap.title}</h1>}
-        {beatmap?.version && <h2>{beatmap.version}</h2>}
-        {beatmap?.artist && <p>{beatmap.artist}</p>}
-        {beatmap?.creator &&  <p>{beatmap.creator}</p>}
-        {beatmap?.star && <p>{beatmap.star}</p>}
+        {beatmap?.cover && (
+          <div className='h-32'>
+            <img src={beatmap.cover} className='w-full h-full object-cover' alt={beatmap?.title} />
+          </div>
+        )}
+        <div className='p-4 flex justify-between'>
+          <div>
+            {beatmap?.title && <h1 className='text-left text-white text-lg font-bold mb-1'>{beatmap.title}</h1>}
+            {beatmap?.version && <h2 className='text-left text-gray-400 text-sm mb-1'>{beatmap.version}</h2>}
+            {beatmap?.artist && beatmap?.creator && <p className='text-left text-gray-500 text-sm mb-2'>{`${beatmap.artist} - ${beatmap.creator}`}</p>}
+            {beatmap?.star && (
+              <div className='rounded-full bg-linear-to-bl from-emerald-400 to-blue-700 w-18 px-3 py-1'>
+                <p>★ {beatmap.star}</p>
+              </div>
+            )}
+          </div>
+          <div>
+            {beatmap?.audio && (
+              <div>
+                <audio ref={audioRef} src={beatmap?.audio} onLoadedMetadata={volumeControl} />
+                <button 
+                  onClick={(event) => {
+                    event.preventDefault(); 
+                    event.stopPropagation();
+                    toggleAudio();
+                  }}
+                  className='rounded-full bg-green-500 w-14 h-14 flex justify-center items-center cursor-pointer'
+                >
+                  {
+                    playing ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="size-8">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="size-8">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+                      </svg>
+                    )
+                  }
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </a>}
 
-      {beatmap?.audio && <audio key={beatmap.audio} ref={audioRef} onLoadedMetadata={volumeControl} controls> <source src={beatmap?.audio} type="audio/mp3" /> The browser does not support the audio tag</audio>}
     </div>
   )
 }
-
 export default MapDisplay

@@ -13,9 +13,11 @@ const Search = () => {
   const [tags, setTags] = useState<ModelTags>([]);
   const [maps, setMaps] = useState<ModelMaps[]>([]);
   const [error, setError] = useState<number>(2);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const changeTab = () => {
     setTab(!tab);
+    setError(2);
   }
   const findBeatmap = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -29,6 +31,7 @@ const Search = () => {
       setError(checkBeatMapId);
 
       if(checkBeatMapId == 2){
+        setLoading(true);
         if (tab) {
           // find similar maps
           const res = await api.post(`/api/find-map/${beatmapId}`);
@@ -41,10 +44,11 @@ const Search = () => {
       }
     } catch(error) {
       console.error('There was an error searching for the beatmap', error);
+    } finally {
+      setLoading(false);
     }
 
   }
-  //{tab ? "Find" : "Classify"}
 
   return (
     <div>
@@ -87,40 +91,44 @@ const Search = () => {
           )}
         </div>
 
-
         <button type="submit" className='cursor-pointer my-4 rounded-2xl bg-white px-16 py-2 text-xl text-[#2a2a2a] hover:shadow-2xl hover:-translate-y-1 active:scale-85 duration-200'>
           {tab ? "Find" : "Classify"}
         </button>
       </form>
 
-      { tab ? (
-        <div>
-          {maps.map((val, ind) => {
-            return <Carousel key={ind} maps={val} />
-          })}
+      {loading ? (
+        <div className='flex justify-center my-4'>
+          <div className='rounded-full w-10 h-10 border-3 border-gray-500 border-t-white animate-spin'></div>
         </div>
       ) : (
-        <div>
-          {tags.map((val) =>  {
-              return (
-                <div>
-                  <p>{val[0]}</p>
-                  {val[1].map((tag) => {
-                    return <p>{tag}</p>
-                  })}
-                </div>
-              )
+        tab ? (
+          <div>
+            {maps.map((val, ind) => {
+              return <Carousel key={ind} maps={val} />
             })}
-        </div>
+          </div>
+        ) : (
+          <div>
+            {tags.map((val) =>  {
+                return (
+                  <div>
+                    <p>{val[0]}</p>
+                    {val[1].map((tag) => {
+                      return <p>{tag}</p>
+                    })}
+                  </div>
+                )
+              })}
+          </div>
+        )
       )}
+
 
     </div>
   )
 }
 
 export default Search
-// <!--- update the rest, there should be a loading skeleton or smt for the carousel --->
 
 // add a drop down for which model they want to use
-// a tab layout for classify map and find similar maps
 // it should provide a list of maps and do some like circular carousel action
