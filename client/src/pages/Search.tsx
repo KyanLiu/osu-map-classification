@@ -6,6 +6,27 @@ import Carousel from '../components/Carousel.tsx';
 type ModelTags = [string, Tags][]
 type ModelMaps = Map[]
 
+const tableColour = {
+  "rfc": "text-blue-300",
+  "lr": "text-green-300",
+  "svm": "text-orange-300",
+  "knn": "text-red-300",
+}
+
+const tagColour = {
+  "consistency": "bg-blue-500/20 text-blue-500 border-blue-500/40",
+  "speed": "bg-green-500/20 text-green-500 border-green-500/40",
+  "jump aim": "bg-orange-500/20 text-orange-500 border-orange-500/40",
+  "stream": "bg-red-500/20 text-red-500 border-red-500/40",
+  "spaced stream": "bg-purple-500/20 text-purple-500 border-purple-500/40",
+  "burst" : "bg-yellow-500/20 text-yellow-500 border-yellow-500/40",
+  "tech": "bg-cyan-500/20 text-cyan-500 border-cyan-500/40",
+  "flow aim": "bg-pink-500/20 text-pink-500 border-pink-500/40",
+  "aim slop": "bg-teal-500/20 text-teal-500 border-teal-500/40",
+  "stamina": "bg-emerald-500/20 text-emerald-500 border-emerald-500/40",
+  "reading": "bg-rose-500/20 text-rose-500 border-rose-500/40",
+}
+
 const Search = () => {
   // tab = True => Find Similar Maps, tab = False => Classify Maps
   const [tab, setTab] = useState<boolean>(false);
@@ -19,6 +40,8 @@ const Search = () => {
     setTab(!tab);
     setError(2);
   }
+
+
   const findBeatmap = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
@@ -108,18 +131,29 @@ const Search = () => {
             })}
           </div>
         ) : (
-          <div>
-            {tags.map((val) =>  {
-                return (
-                  <div>
-                    <p>{val[0]}</p>
-                    {val[1].map((tag) => {
-                      return <p>{tag}</p>
-                    })}
-                  </div>
-                )
-              })}
-          </div>
+          tags.length != 0 &&
+            <div className='w-full rounded-xl bg-gray-800 overflow-hidden'>
+              <div className='p-4 grid grid-cols-2 text-left text-white bg-gray-700 font-semibold'>
+                <p>Model</p>
+                <p>Predictions</p>
+              </div>
+              {tags.map((val) =>  {
+                  return (
+                    <div className='p-4 grid grid-cols-2 text-left border-b border-gray-700 last:border-none'>
+                      <div className={`uppercase font-semibold w-fit py-1 px-3 rounded-xl ${tableColour[val[0]] || 'bg-gray-300'}`}>
+                        {val[0]}
+                      </div>
+                      <div className='flex flex-wrap gap-2'>
+                        {val[1].map((tag) => {
+                          return <div 
+                                  className={`border rounded-xl px-2 py-1 text-sm ${tagColour[tag] || 'bg-gray-500/20 text-gray-500 border-gray-500/30'}
+                                  `}>{tag}</div>
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
         )
       )}
 
