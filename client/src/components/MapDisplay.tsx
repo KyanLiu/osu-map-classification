@@ -19,6 +19,18 @@ interface BeatmapData {
   title: string | null;
 };
 
+const timeConvert = (len: Number) => {
+  const hours = Math.floor(len / 3600);
+  const minutes = Math.floor((len % 3600) / 60);
+  const seconds = (len % 3600) % 60;
+  if(hours){
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+  }
+  if(minutes){
+    return `${minutes}:${String(seconds).padStart(2, '0')}`
+  }
+  return `${seconds}`
+}
 
 const MapDisplay = ({ detail }: { detail: Map }) => {
   const [beatmap, setBeatmap] = useState<BeatmapData>({
@@ -106,7 +118,7 @@ const MapDisplay = ({ detail }: { detail: Map }) => {
           <div className={`m-4 hidden md:flex p-2 grow justify-evenly flex-wrap gap-3 overflow-hidden transition-all duration-500 ease-in-out ${hover ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {beatmap?.len && (
               <div>
-                <p className='text-2xl font-bold text-blue-300'>{beatmap.len}</p>
+                <p className='text-2xl font-bold text-blue-300'>{timeConvert(beatmap.len)}</p>
                 <p className='text-xs text-gray-500 uppercase tracking-wider'>LENGTH</p>
               </div>
             )}
