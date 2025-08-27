@@ -32,6 +32,7 @@ const timeConvert = (len: Number) => {
   return `${seconds}`
 }
 
+
 const MapDisplay = ({ detail }: { detail: Map }) => {
   const [beatmap, setBeatmap] = useState<BeatmapData>({
     id: null,  
@@ -96,7 +97,7 @@ const MapDisplay = ({ detail }: { detail: Map }) => {
   }, [detail])
 
   return (
-    <div className={`w-full sm:h-70 bg-gray-800 rounded-xl shadow-lg overflow-hidden ${hover ? 'flex flex-col justify-center' : ''}`} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+    <div className={`w-full sm:h-70 h-fit bg-gray-800 rounded-xl shadow-lg overflow-hidden ${hover ? 'flex flex-col justify-center' : ''}`} onMouseEnter={() => window.innerWidth >=640 && setHover(true)} onMouseLeave={() => setHover(false)}>
       {beatmap?.url && <a href={beatmap.url} target="_blank">
         {beatmap?.cover && !hover && (
           <div className='h-32' >
