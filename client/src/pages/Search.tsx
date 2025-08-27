@@ -140,7 +140,7 @@ const Search = () => {
               {tags.map((val) =>  {
                   return (
                     <div className='p-4 grid grid-cols-2 text-left border-b border-gray-700 last:border-none'>
-                      <div className={`uppercase font-semibold w-fit py-1 px-3 rounded-xl ${tableColour[val[0]] || 'bg-gray-300'}`}>
+                      <div className={`my-auto uppercase font-semibold w-fit py-1 px-3 rounded-xl ${tableColour[val[0]] || 'bg-gray-300'}`}>
                         {val[0]}
                       </div>
                       <div className='flex flex-wrap gap-2'>
