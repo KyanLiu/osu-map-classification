@@ -1,6 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from db import delete_submission
 from train import OsuModel, insertDataById, shapePredictData
+from models import User
+from auth import get_current_admin_user
 from pydantic import BaseModel
 from typing import List
 
@@ -19,7 +21,7 @@ class TrainData(BaseModel):
     labels: List[str]
 
 @router.post('/train')
-async def train_beatmap(traindata: TrainData):
+async def train_beatmap(traindata: TrainData, admin_user: User = Depends(get_current_admin_user)):
     delete_submission('staged_data', traindata.beatmapId)
     for i in traindata.labels:
         insertDataById(traindata.beatmapId, i)
