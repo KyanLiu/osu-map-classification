@@ -40,7 +40,7 @@ const Login = () => {
             <label> Enter Admin Password:
               <input type="password" required onChange={(event) => setPassword(event.target.value)} />
             </label>
-            <button type="submit">Login</button>
+            <button type="submit">{loading ? 'LOGGING IN...': 'LOGIN'}</button>
           </form>
         )
       )}

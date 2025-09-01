@@ -50,7 +50,7 @@ const Admin = () => {
   const deleteSingleSubmission = async (beatmapId: number, refreshNow: boolean) => {
     try {
       if (tab) {
-        const res = await api.delete(`/api/delete-staged/${beatmapId}`, { headers: {Authorization: `Bearer${token}`}}{ headers: {Authorization: `Bearer ${token}`}});
+        const res = await api.delete(`/api/delete-staged/${beatmapId}`, { headers: {Authorization: `Bearer${token}`}});
       }
       else {
         const res = await api.delete(`/api/delete-submission/${beatmapId}`, { headers: {Authorization: `Bearer ${token}`}});
@@ -99,6 +99,7 @@ const Admin = () => {
   useEffect(() => {
     const fetchSubmissions = async () => {
       try {
+        console.log(token)
         const res = await api.get('/api/retrieve-submissions', { headers: {Authorization: `Bearer ${token}`}});
         console.log('New submissions', res.data.submissions);
         setSubmissions(res.data.submissions);

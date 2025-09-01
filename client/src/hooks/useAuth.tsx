@@ -23,9 +23,9 @@ export function AuthProvider( { children }: AuthProviderProps){
       setToken(accessToken);
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('token', accessToken);
+      // may need to see the cases
     } catch (error) {
       setError('Failed to log user in');
-      // may need to see the cases
     } finally {
       setLoading(false);
     }
@@ -57,7 +57,7 @@ export function AuthProvider( { children }: AuthProviderProps){
   }, [])
 
   return (
-    <AuthContext.Provider value = {{user, login, logout, loading, error}}>
+    <AuthContext.Provider value = {{user, token, login, logout, loading, error}}>
       {children}
     </AuthContext.Provider>
   )
