@@ -6,30 +6,26 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider( { children }: AuthProviderProps){
   const [user, setUser] = useState<User | null>(null);
-  //const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<bool>(false);
   const [error, setError] = useState<string | null>(null);
-
-  const verifyToken = async (): void => {
-    try {
-      const res = await api.post('/auth', {})
-
-    } catch (error) {
-      console.error("There was an error verifying the token,", error);
-    }
-  }
 
   const login = async (userData: User): Promise<void> => {
     try {
       setLoading(true);
-
-
-      //const res = await authService
-      // should add authentication here
-      setUser(userData);
+      const formData = new FormData();
+      formData.append("username", userData.username);
+      formData.append("password", userData.password);
+      const res = await api.post('/token', formData);
+      const accessToken = res.data.access_token;
+  
+      setUser({username: userData.username});
+      setToken(accessToken);
       localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('token', accessToken);
     } catch (error) {
       setError('Failed to log user in');
+      // may need to see the cases
     } finally {
       setLoading(false);
     }
@@ -37,24 +33,18 @@ export function AuthProvider( { children }: AuthProviderProps){
   const logout = (): void => {
     setUser(null);
     localStorage.removeItem('user');
-    setErorr(null);
+    localStorage.removeItem('token');
+    setError(null);
   } 
-
-  /*useEffect(() => {
-    if(token){
-      verifyToken();
-    }
-    else {
-      setLoading(false);
-    }
-  }, [token])*/
 
   useEffect(() => {
     try {
       const userLocal = localStorage.getItem('user');
-      if(userLocal){
+      const accessToken = localStorage.getItem('token');
+      if(userLocal && accessToken){
         const userSaved = JSON.parse(userLocal);
-        setUser(userSaved)
+        setUser(userSaved);
+        setToken(accessToken);
         console.log("Retrieved the user from local storage named", userSaved)
       }
     } catch (error){

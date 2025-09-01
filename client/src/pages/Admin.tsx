@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Logout from '../components/Logout.tsx';
 import api from '../api/api.ts';
 import MapDetail from '../components/MapDetail.tsx';
+import { useAuth } from '../hooks/useAuth.tsx';
 import { type Submission } from '../constants/types.ts';
 
 
@@ -11,15 +12,16 @@ const Admin = () => {
   const [tab, setTab] = useState<boolean>(false);
   const [refresh, setRefresh] = useState<number>(0);
   const [selected, setSelected] = useState<Submission[]>([]);
+  const { token, logout } = useAuth();
 
   const submitButton = async (beatmapId: number, tags: string[], refreshNow: boolean) => {
     try {
 
       if (tab) {
-        const res = await api.post('/api/train', {beatmapId: beatmapId, labels: tags});
+        const res = await api.post('/api/train', {beatmapId: beatmapId, labels: tags}, { headers: {Authorization: `Bearer ${token}`}});
       }
       else {
-        const res = await api.post('/api/stage-submissions', {beatmapId: beatmapId, tags: tags});
+        const res = await api.post('/api/stage-submissions', {beatmapId: beatmapId, tags: tags}, { headers: {Authorization: `Bearer ${token}`}});
       }
       if(refreshNow){
         if(tab) {
@@ -48,10 +50,10 @@ const Admin = () => {
   const deleteSingleSubmission = async (beatmapId: number, refreshNow: boolean) => {
     try {
       if (tab) {
-        const res = await api.delete(`/api/delete-staged/${beatmapId}`);
+        const res = await api.delete(`/api/delete-staged/${beatmapId}`, { headers: {Authorization: `Bearer${token}`}}{ headers: {Authorization: `Bearer ${token}`}});
       }
       else {
-        const res = await api.delete(`/api/delete-submission/${beatmapId}`);
+        const res = await api.delete(`/api/delete-submission/${beatmapId}`, { headers: {Authorization: `Bearer ${token}`}});
       }
       if(refreshNow){
         alert('The data has been deleted from the database')
@@ -97,7 +99,7 @@ const Admin = () => {
   useEffect(() => {
     const fetchSubmissions = async () => {
       try {
-        const res = await api.get('/api/retrieve-submissions');
+        const res = await api.get('/api/retrieve-submissions', { headers: {Authorization: `Bearer ${token}`}});
         console.log('New submissions', res.data.submissions);
         setSubmissions(res.data.submissions);
       } catch (error) {
@@ -106,7 +108,7 @@ const Admin = () => {
     }
     const fetchStagedChanges = async () => {
       try {
-        const res = await api.get('/api/staged-submissions');
+        const res = await api.get('/api/staged-submissions', { headers: {Authorization: `Bearer ${token}`}});
         console.log('Staged submissions', res.data.submissions);
         setStaged(res.data.submissions);
       } catch (error) {

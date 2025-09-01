@@ -4,6 +4,7 @@ import { useState } from 'react';
 const Navbar = () => {
   const [hover, setHover] = useState<boolean>(false);
 
+  // add auth hook to include admin page
   return (
     <div className='bg-[#161717] flex flex-col w-auto pl-4 py-10 h-full gap-4'>
         <NavLink to="/" className={({ isActive }) => `hover:bg-black duration-200 py-2 pl-2 w-14 rounded-l-md active:scale-95 ${ isActive ? 'bg-black' : ''}`}>
