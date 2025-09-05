@@ -80,3 +80,4 @@ async def get_osu_data(beatmap_id: int):
 async def validate_map(beatmap_id: int):
     valid = validate_beatmap_id(beatmap_id)
     return { "valid": valid}
+

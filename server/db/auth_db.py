@@ -29,7 +29,6 @@ def get_user(username: str):
     res = cur.fetchone()
     print(res)
     if res:
-        pass
         return UserInDB(username=res[0], email=res[1], is_admin=int(res[3]), hashed_password=res[2])
     return None
 #   get_user("kyanliu9")

@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from db import add_submission, retrieve_submissions, delete_submission
 from models import User
+from limiter import limiter
 from auth import get_current_admin_user
 from pydantic import BaseModel
 from typing import List
@@ -13,7 +14,8 @@ class SubmissionData(BaseModel):
 
 # this endpoint is open for all users
 @router.post('/create-submissions')
-async def create_submission(submission_data: SubmissionData):
+@limiter.limit("5/minute")
+async def create_submission(request: Request, submission_data: SubmissionData):
     for i in submission_data.tags:
         add_submission('submissions_data', i, submission_data.beatmapId)
     return {"status": "saved submission beatmaps and tags"}

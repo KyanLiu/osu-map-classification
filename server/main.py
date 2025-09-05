@@ -1,10 +1,13 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
-from auth import authenticate_user, create_access_token, get_current_active_user, get_password_hash, get_current_admin_user
+from auth import authenticate_user, create_access_token, get_password_hash, get_current_admin_user
 from api import training_router, submissions_router, osu_api_router
 from models import Token, User, UserCreate
-from db import get_user, user_exists, create_user
+from limiter import limiter
+from db import user_exists, create_user
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 app = FastAPI()
 app.include_router(submissions_router, prefix='/api')
@@ -12,6 +15,8 @@ app.include_router(training_router, prefix='/api')
 app.include_router(osu_api_router, prefix='/api')
 
 
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 origins = [
     "http://localhost:5173",
