@@ -7,21 +7,23 @@ import MapClassButton from '../components/MapClassButton.tsx';
 const TrainData = () => {
   const [beatmapId, setBeatmapId] = useState<number | ''>('')
   const [tags, setTags] = useState<string[]>([]);
+  const [buttonLoad, setButtonLoad] = useState<boolean>(false);
   const [load, setLoad] = useState<boolean>(false);
-  const [error, setError ] = useState<number>(2);
+  const [formError, setFormError] = useState<number>(2);
+  const [error, setError] = useState<string | null>(null);
 
   const submitTrainData = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       console.log({beatmapId: beatmapId, tags: tags})
+      setButtonLoad(true);
       if(beatmapId == ""){
-        setError(0);
+        setFormError(0);
         return;
       }
-
       const checkRes = await api.get(`/api/validate-id/${beatmapId}`);
       const checkBeatMapId = checkRes.data.valid;
-      setError(checkBeatMapId);
+      setFormError(checkBeatMapId);
       if(checkBeatMapId == 2){
         const res = await api.post('/api/create-submissions', {beatmapId: beatmapId, tags: tags});
         //alert(`The beatmap ${beatmapId} has been added to the processing stage.`)
@@ -30,9 +32,19 @@ const TrainData = () => {
         setTags([]);
         setBeatmapId('')
       }
+      setError(null);
     }
     catch(error) {
-      console.log("There was an error processing the beatmap with Id:", beatmapId);
+      if(error.response?.status == 429){
+        setError('You must wait a minute for the next submission.')
+        setLoad(true);
+      }
+      else{
+        console.log("There was an error processing the beatmap with Id:", beatmapId);
+      }
+    }
+    finally {
+      setButtonLoad(false);
     }
   }
 
@@ -64,16 +76,17 @@ const TrainData = () => {
             <input
               type="text" required value={beatmapId}
               className={`bg-[#555555] rounded-2xl w-48 px-3 py-2 text-center sm:text-left focus:outline-none focus:placeholder-transparent focus:scale-103 duration-100 shadow-xl
-                        ${error != 2 ? 'border border-red-500 ' : ''}`}
+                        ${formError != 2 ? 'border border-red-500 ' : ''}`}
               placeholder="Enter Beatmap Id"
               onChange={(event) => {
-                setError(2);
+                setError(null);
+                setFormError(2);
                 const digit = event.target.value.replace(/[^0-9]/g, '');
                 setBeatmapId(digit == '' ? '' : Number(digit));
               }}/>
             {beatmapId && (
               <div className='absolute right-4 top-2'>
-                <button type="button" className='cursor-pointer active:scale-95' onClick={() => {setBeatmapId(''); setError(2);}} >
+                <button type="button" className='cursor-pointer active:scale-95' onClick={() => {setBeatmapId(''); setFormError(2); setError(null);}} >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                   </svg>
@@ -81,19 +94,19 @@ const TrainData = () => {
               </div>
             )}
           </div>
-          {error != 2 && (
-            <span className='text-red-500'>{error == 0 ? 'Please enter a valid beatmap Id' : 'Please enter a valid osu standard beatmap Id'}</span>
+          {formError != 2 && (
+            <span className='text-red-500'>{formError == 0 ? 'Please enter a valid beatmap Id' : 'Please enter a valid osu standard beatmap Id'}</span>
           )}
         </div>
         <div className='max-w-2xl flex flex-wrap justify-center my-8 mx-auto gap-5'>
           {mapTag.map((tag) => (
             <MapClassButton key={tag} tag={tag} all_tags={tags} tagPick={handleTagSelection}  />))}
         </div>
-        <button type="submit" className='cursor-pointer rounded-2xl bg-white px-16 py-2 text-xl text-[#2a2a2a] hover:shadow-2xl hover:-translate-y-1 active:scale-85 duration-200'>Train</button>
+        <button type="submit" className={`cursor-pointer rounded-2xl ${buttonLoad ? 'bg-neutral-500' : 'bg-white'} px-16 py-2 text-xl text-[#2a2a2a] hover:shadow-2xl hover:-translate-y-1 active:scale-85 duration-200`}>{buttonLoad ? 'Training...' : 'Train'}</button>
       </form>
-      <div className={`flex p-2 justify-center items-center fixed right-1 bottom-16 max-w-md w-1/2 h-20 bg-white text-black rounded-l-sm ease-in-out duration-1000
+      <div className={`flex p-2 justify-center items-center fixed right-1 bottom-16 max-w-md w-1/2 h-20 ${error ? 'bg-red-100 text-red-700 border border-red-400' : 'bg-white text-black'}  rounded-l-sm ease-in-out duration-1000
                       ${load ? 'translate-x-0' : 'translate-x-[120%]'}`}>
-        <p>Data has been processed. Thanks</p>
+        <p>{error ? error : 'Data has been processed. Thanks'}</p>
       </div>
     </div>
   )
